@@ -1,0 +1,4 @@
+2026-04-07 14:00:26,606 | INFO | xingtu_workflow | Start Xingtu enrichment workflow (mock_mode=True, limit=2)
+2026-04-07 14:00:26,607 | INFO | xingtu_workflow | Loaded 2 pending creators from local storage
+2026-04-07 14:00:26,659 | INFO | xingtu_workflow | Xingtu page ready
+2026-04-07 14:00:26,706 | INFO | xingtu_workflow | Xingtu enrichment workflow finished with status=completed

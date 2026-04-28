@@ -1,0 +1,245 @@
+{
+  "structured_requirement": {
+    "brand": "Lumiere",
+    "product_name": "双效精华液",
+    "product_sku": "LM-298",
+    "product_category": "美妆",
+    "platform": "douyin",
+    "city": "shanghai",
+    "target_audience": [
+      "女性",
+      "都市白领",
+      "精致消费人群"
+    ],
+    "kpi_goals": [
+      "播放量稳定",
+      "种草效率",
+      "互动质量",
+      "完播率"
+    ],
+    "budget_total": 120000.0,
+    "content_style_tags": [
+      "种草",
+      "教程感",
+      "高级感"
+    ],
+    "tone_tags": [
+      "可信",
+      "都市感",
+      "精致感"
+    ],
+    "compliance_notes": [
+      "must label #广告",
+      "avoid medical claims"
+    ],
+    "exclusions": [
+      "must label #广告",
+      "avoid medical claims"
+    ],
+    "optional_notes": [],
+    "keywords": [
+      "Lumiere",
+      "双效精华液",
+      "LM-298",
+      "美妆",
+      "shanghai",
+      "生活方式",
+      "女性",
+      "都市白领",
+      "精致消费人群",
+      "播放量稳定",
+      "种草效率",
+      "互动质量",
+      "完播率",
+      "种草",
+      "教程感",
+      "高级感",
+      "可信",
+      "都市感",
+      "精致感"
+    ],
+    "hard_constraints": {
+      "creator_categories": [
+        "美妆",
+        "生活方式"
+      ],
+      "cities": [
+        "shanghai"
+      ],
+      "content_themes": [
+        "种草",
+        "教程感"
+      ],
+      "audience_traits": [
+        "女性",
+        "都市白领"
+      ],
+      "exclusions": [
+        "must label #广告",
+        "avoid medical claims"
+      ],
+      "min_fans_count": 300000,
+      "budget_cap_per_creator": 42000.0,
+      "notes": [
+        "Must: beauty creators with female audience in tier-1 cities",
+        "must label #广告",
+        "avoid medical claims"
+      ]
+    },
+    "preferred_constraints": {
+      "creator_categories": [],
+      "cities": [],
+      "content_themes": [
+        "种草",
+        "教程感",
+        "高级感"
+      ],
+      "audience_traits": [
+        "女性",
+        "都市白领",
+        "精致消费人群"
+      ],
+      "exclusions": [],
+      "min_fans_count": null,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Prefer: creators with recent growth and prior skincare seeding",
+        "Prefer creators whose tags visibly match the brand brief."
+      ]
+    },
+    "negotiable_constraints": {
+      "creator_categories": [],
+      "cities": [],
+      "content_themes": [],
+      "audience_traits": [],
+      "exclusions": [],
+      "min_fans_count": null,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Optional: can provide backstage data screenshot"
+      ]
+    }
+  },
+  "parse_status": "complete",
+  "parser_notes": [
+    "Parsed brief with deterministic keyword and pattern rules.",
+    "Defaulted platform to `douyin` / Xingtu-compatible flow.",
+    "Detected primary creator category `美妆`.",
+    "Detected city `shanghai`.",
+    "Detected budget `120,000`."
+  ],
+  "priority_signals": [
+    {
+      "field": "explicit_priority_note",
+      "value": "Must: beauty creators with female audience in tier-1 cities",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Must: beauty creators with female audience in tier-1 cities"
+    },
+    {
+      "field": "explicit_priority_note",
+      "value": "Prefer: creators with recent growth and prior skincare seeding",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Prefer: creators with recent growth and prior skincare seeding"
+    },
+    {
+      "field": "explicit_priority_note",
+      "value": "Optional: can provide backstage data screenshot",
+      "priority_color": "yellow",
+      "mapped_bucket": "negotiable_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Optional: can provide backstage data screenshot"
+    },
+    {
+      "field": "hard_constraints.creator_categories",
+      "value": "美妆",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Core category signals are mapped into hard_constraints for downstream filtering.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.creator_categories",
+      "value": "生活方式",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Core category signals are mapped into hard_constraints for downstream filtering.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.cities",
+      "value": "shanghai",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Explicit city constraints or normalized city signals are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.audience_traits",
+      "value": "女性",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Audience traits needed for shortlist filtering are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.audience_traits",
+      "value": "都市白领",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Audience traits needed for shortlist filtering are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "preferred_constraints.notes",
+      "value": "Prefer: creators with recent growth and prior skincare seeding",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Preference notes remain visible for scouting and ranking without becoming hard blockers.",
+      "source_text": null
+    },
+    {
+      "field": "preferred_constraints.notes",
+      "value": "Prefer creators whose tags visibly match the brand brief.",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Preference notes remain visible for scouting and ranking without becoming hard blockers.",
+      "source_text": null
+    },
+    {
+      "field": "negotiable_constraints.notes",
+      "value": "Optional: can provide backstage data screenshot",
+      "priority_color": "yellow",
+      "mapped_bucket": "negotiable_constraints",
+      "rationale": "Negotiable or optional notes are preserved for later shortlist review and outreach.",
+      "source_text": null
+    },
+    {
+      "field": "compliance_notes",
+      "value": "must label #广告",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Compliance notes are treated as red-line constraints for downstream review.",
+      "source_text": null
+    },
+    {
+      "field": "compliance_notes",
+      "value": "avoid medical claims",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Compliance notes are treated as red-line constraints for downstream review.",
+      "source_text": null
+    }
+  ],
+  "missing_information": [],
+  "ambiguities": [],
+  "contradictions": [],
+  "unsupported_requirements": [],
+  "defaults_applied": [
+    "min_fans_count was derived heuristically from budget_total and KPI signals.",
+    "budget_cap_per_creator was derived as 35% of budget_total."
+  ]
+}

@@ -1,0 +1,1 @@
+"""Douyin discovery adapter."""

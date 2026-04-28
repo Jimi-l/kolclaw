@@ -1,0 +1,428 @@
+{
+  "$defs": {
+    "BriefConstraintBucketName": {
+      "enum": [
+        "hard_constraints",
+        "preferred_constraints",
+        "negotiable_constraints"
+      ],
+      "title": "BriefConstraintBucketName",
+      "type": "string"
+    },
+    "BriefParseIssue": {
+      "additionalProperties": false,
+      "description": "Normalized diagnostic item surfaced by the brief parser.",
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/BriefParseIssueCode"
+        },
+        "severity": {
+          "$ref": "#/$defs/BriefParseIssueSeverity"
+        },
+        "field": {
+          "description": "Field or domain area impacted by this issue.",
+          "title": "Field",
+          "type": "string"
+        },
+        "message": {
+          "description": "Human-readable explanation for engineers and reviewers.",
+          "title": "Message",
+          "type": "string"
+        },
+        "source_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Source snippet or normalized value that triggered the issue, when available.",
+          "title": "Source Text"
+        }
+      },
+      "required": [
+        "code",
+        "severity",
+        "field",
+        "message"
+      ],
+      "title": "BriefParseIssue",
+      "type": "object"
+    },
+    "BriefParseIssueCode": {
+      "enum": [
+        "missing_field",
+        "ambiguous_field",
+        "contradictory_field",
+        "unsupported_requirement"
+      ],
+      "title": "BriefParseIssueCode",
+      "type": "string"
+    },
+    "BriefParseIssueSeverity": {
+      "enum": [
+        "warning",
+        "error"
+      ],
+      "title": "BriefParseIssueSeverity",
+      "type": "string"
+    },
+    "BriefParseStatus": {
+      "enum": [
+        "complete",
+        "partial",
+        "needs_review"
+      ],
+      "title": "BriefParseStatus",
+      "type": "string"
+    },
+    "BriefPriorityColor": {
+      "enum": [
+        "red",
+        "green",
+        "yellow"
+      ],
+      "title": "BriefPriorityColor",
+      "type": "string"
+    },
+    "BriefPrioritySignal": {
+      "additionalProperties": false,
+      "description": "Priority mapping item derived from the brief and mapped into repo constraint buckets.",
+      "properties": {
+        "field": {
+          "description": "Requirement field or bucket path represented by the signal.",
+          "title": "Field",
+          "type": "string"
+        },
+        "value": {
+          "description": "Normalized value or note carried downstream.",
+          "title": "Value",
+          "type": "string"
+        },
+        "priority_color": {
+          "$ref": "#/$defs/BriefPriorityColor"
+        },
+        "mapped_bucket": {
+          "$ref": "#/$defs/BriefConstraintBucketName"
+        },
+        "rationale": {
+          "description": "Why the signal was mapped to this priority bucket.",
+          "title": "Rationale",
+          "type": "string"
+        },
+        "source_text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Original brief line or phrase when the mapping came from explicit text.",
+          "title": "Source Text"
+        }
+      },
+      "required": [
+        "field",
+        "value",
+        "priority_color",
+        "mapped_bucket",
+        "rationale"
+      ],
+      "title": "BriefPrioritySignal",
+      "type": "object"
+    },
+    "RequirementConstraintBucket": {
+      "additionalProperties": false,
+      "properties": {
+        "creator_categories": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Creator Categories",
+          "type": "array"
+        },
+        "cities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cities",
+          "type": "array"
+        },
+        "content_themes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Content Themes",
+          "type": "array"
+        },
+        "audience_traits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Audience Traits",
+          "type": "array"
+        },
+        "exclusions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "min_fans_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Fans Count"
+        },
+        "budget_cap_per_creator": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Cap Per Creator"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "title": "RequirementConstraintBucket",
+      "type": "object"
+    },
+    "ShortlistRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "brand": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Brand"
+        },
+        "product_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Name"
+        },
+        "product_sku": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Sku"
+        },
+        "product_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Category"
+        },
+        "platform": {
+          "default": "douyin",
+          "title": "Platform",
+          "type": "string"
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "City"
+        },
+        "target_audience": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Audience",
+          "type": "array"
+        },
+        "kpi_goals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Kpi Goals",
+          "type": "array"
+        },
+        "budget_total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Total"
+        },
+        "content_style_tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Content Style Tags",
+          "type": "array"
+        },
+        "tone_tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tone Tags",
+          "type": "array"
+        },
+        "compliance_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Compliance Notes",
+          "type": "array"
+        },
+        "exclusions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "optional_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Optional Notes",
+          "type": "array"
+        },
+        "keywords": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Keywords",
+          "type": "array"
+        },
+        "hard_constraints": {
+          "$ref": "#/$defs/RequirementConstraintBucket"
+        },
+        "preferred_constraints": {
+          "$ref": "#/$defs/RequirementConstraintBucket"
+        },
+        "negotiable_constraints": {
+          "$ref": "#/$defs/RequirementConstraintBucket"
+        }
+      },
+      "title": "ShortlistRequirement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Backend-facing response contract for brief parsing.",
+  "properties": {
+    "structured_requirement": {
+      "$ref": "#/$defs/ShortlistRequirement"
+    },
+    "parse_status": {
+      "$ref": "#/$defs/BriefParseStatus"
+    },
+    "parser_notes": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Parser Notes",
+      "type": "array"
+    },
+    "priority_signals": {
+      "items": {
+        "$ref": "#/$defs/BriefPrioritySignal"
+      },
+      "title": "Priority Signals",
+      "type": "array"
+    },
+    "missing_information": {
+      "items": {
+        "$ref": "#/$defs/BriefParseIssue"
+      },
+      "title": "Missing Information",
+      "type": "array"
+    },
+    "ambiguities": {
+      "items": {
+        "$ref": "#/$defs/BriefParseIssue"
+      },
+      "title": "Ambiguities",
+      "type": "array"
+    },
+    "contradictions": {
+      "items": {
+        "$ref": "#/$defs/BriefParseIssue"
+      },
+      "title": "Contradictions",
+      "type": "array"
+    },
+    "unsupported_requirements": {
+      "items": {
+        "$ref": "#/$defs/BriefParseIssue"
+      },
+      "title": "Unsupported Requirements",
+      "type": "array"
+    },
+    "defaults_applied": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Defaults Applied",
+      "type": "array"
+    }
+  },
+  "required": [
+    "structured_requirement",
+    "parse_status"
+  ],
+  "title": "BriefParseOutput",
+  "type": "object"
+}

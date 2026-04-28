@@ -1,0 +1,12 @@
+{
+  "storage_state_path": "/home/tuo/project/ai_social/playwright/.auth/xingtu.json",
+  "account_name": "Demo Workspace Account 001",
+  "headless": false,
+  "row_limit": 3,
+  "target_row_index": 0,
+  "filter_config": {
+    "named_filters": {
+      "美妆": ["美妆测评种草"]
+    }
+  }
+}

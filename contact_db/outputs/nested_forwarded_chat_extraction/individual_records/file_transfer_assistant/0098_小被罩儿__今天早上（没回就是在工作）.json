@@ -1,0 +1,89 @@
+{
+  "weflow": {
+    "version": "1.0.3",
+    "exportedAt": 1776930966,
+    "generator": "extract_nested_forwarded_chats"
+  },
+  "session": {
+    "wxid": "record_0098",
+    "nickname": "今天早上（没回就是在工作）",
+    "remark": "",
+    "displayName": "小被罩儿 & 今天早上（没回就是在工作）",
+    "participants": [
+      "小被罩儿",
+      "今天早上（没回就是在工作）"
+    ],
+    "pairKey": "今天早上（没回就是在工作）__小被罩儿",
+    "type": "friend",
+    "lastTimestamp": 1776909835,
+    "messageCount": 3,
+    "avatar": "",
+    "sourceFile": "私聊_文件传输助手.json",
+    "sourceTopMessageIndex": 0,
+    "recordOrder": 98,
+    "lineRange": [
+      727,
+      750
+    ],
+    "startKind": "title_start"
+  },
+  "messages": [
+    {
+      "localId": 1,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "阿一\n【合作档期】\n4.1-4.5\n【合作需求】\n穿逆水寒古装服饰cos，自制实体花弓箭变装，拍摄外景踏青\n参考链接： https://v.douyin.com/8Ij_k-bTABk/ \n【以下请确认】\n1、抖音1-20s星图视频报价及返点：\n2、抖音1-20s水下视频报价（是否含税6）：\n3、是否有其他免费赠送分发平台，需要加品牌tag（如不能希望给个分发优惠报价）：\n4、是否可以免费分发网易内部平台，包含大神、云音乐笔记（需要永久保留，如不可，可能暂时就不考虑合作）：\n5、是否可授权3个月原生投流，需要抖音合作码：（授权客户投流及授权客户官方账号发布）：\n6、视频是否可以免费授权客户二创：\n7、10天内可以保多少播放量（客户要求保）：\n8、发布档期4.1-4.5是否可以：\n9、档期附近是否有待发布或刚发布的逆水寒商单:\n10、发布后3天是否可以不更新视频：\n11、如游戏不提供衣服可否自行租cos服：\n12、如提供衣服涉及邮寄能否自行承担来回顺丰快递费用：\n13、是否含妆造及拍摄道具：\n14、抖音作品需保留1年是否可以：\n如有合作须知请提前同步~（例如脚本视频修改次数限制等）",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0098_0001",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 727,
+      "sourceLineEnd": 748,
+      "recordOrder": 98,
+      "mergedOrder": null
+    },
+    {
+      "localId": 2,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "阿一的这个需求辛苦看看",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0098_0002",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 749,
+      "sourceLineEnd": 749,
+      "recordOrder": 98,
+      "mergedOrder": null
+    },
+    {
+      "localId": 3,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "来了",
+      "isSend": 0,
+      "senderUsername": "participant_今天早上_没回就是在工作",
+      "senderDisplayName": "今天早上（没回就是在工作）",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0098_0003",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 750,
+      "sourceLineEnd": 750,
+      "recordOrder": 98,
+      "mergedOrder": null
+    }
+  ]
+}

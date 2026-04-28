@@ -1,0 +1,51 @@
+# OS / editor
+.DS_Store
+.vscode/
+.claude/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+# Python
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+.pytest_cache/
+**/.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+
+# Node / frontend build
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+build/
+**/build/
+
+# Browser auth / storage / local profiles
+**/.auth/
+**/playwright/.auth/
+**/browser_state/
+**/browser_state/**
+**/storage_state*.json
+**/storage-state*.json
+**/Cookies
+**/Cookies-journal
+**/Network/
+**/Session Storage/
+**/Local Storage/
+**/Code Cache/
+**/GPUCache/
+**/QuotaManager*
+
+# Local-only secrets
+**/local_only/env/
+
+# Mixed runtime directory that currently contains browser state and signed session artifacts
+search_agent/runtime/

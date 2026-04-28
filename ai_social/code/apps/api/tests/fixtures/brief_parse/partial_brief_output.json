@@ -1,0 +1,180 @@
+{
+  "structured_requirement": {
+    "brand": "North Harbor",
+    "product_name": "City Walk Sunscreen Mist",
+    "product_sku": null,
+    "product_category": "美妆",
+    "platform": "douyin",
+    "city": null,
+    "target_audience": [
+      "女性"
+    ],
+    "kpi_goals": [
+      "播放量稳定",
+      "种草效率"
+    ],
+    "budget_total": null,
+    "content_style_tags": [
+      "种草"
+    ],
+    "tone_tags": [
+      "都市感"
+    ],
+    "compliance_notes": [],
+    "exclusions": [],
+    "optional_notes": [
+      "shortlist names for first review"
+    ],
+    "keywords": [
+      "North Harbor",
+      "City Walk Sunscreen Mist",
+      "美妆",
+      "生活方式",
+      "女性",
+      "播放量稳定",
+      "种草效率",
+      "种草",
+      "都市感"
+    ],
+    "hard_constraints": {
+      "creator_categories": [
+        "美妆",
+        "生活方式"
+      ],
+      "cities": [],
+      "content_themes": [
+        "种草"
+      ],
+      "audience_traits": [
+        "女性"
+      ],
+      "exclusions": [],
+      "min_fans_count": 100000,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Need: lifestyle or beauty creators"
+      ]
+    },
+    "preferred_constraints": {
+      "creator_categories": [],
+      "cities": [],
+      "content_themes": [
+        "种草"
+      ],
+      "audience_traits": [
+        "女性"
+      ],
+      "exclusions": [],
+      "min_fans_count": null,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Prefer creators whose tags visibly match the brand brief."
+      ]
+    },
+    "negotiable_constraints": {
+      "creator_categories": [],
+      "cities": [],
+      "content_themes": [],
+      "audience_traits": [],
+      "exclusions": [],
+      "min_fans_count": null,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "shortlist names for first review"
+      ]
+    }
+  },
+  "parse_status": "partial",
+  "parser_notes": [
+    "Parsed brief with deterministic keyword and pattern rules.",
+    "Defaulted platform to `douyin` / Xingtu-compatible flow.",
+    "Detected primary creator category `美妆`."
+  ],
+  "priority_signals": [
+    {
+      "field": "explicit_priority_note",
+      "value": "Need: lifestyle or beauty creators",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Need: lifestyle or beauty creators"
+    },
+    {
+      "field": "hard_constraints.creator_categories",
+      "value": "美妆",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Core category signals are mapped into hard_constraints for downstream filtering.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.creator_categories",
+      "value": "生活方式",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Core category signals are mapped into hard_constraints for downstream filtering.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.audience_traits",
+      "value": "女性",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Audience traits needed for shortlist filtering are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "preferred_constraints.notes",
+      "value": "Prefer creators whose tags visibly match the brand brief.",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Preference notes remain visible for scouting and ranking without becoming hard blockers.",
+      "source_text": null
+    },
+    {
+      "field": "negotiable_constraints.notes",
+      "value": "shortlist names for first review",
+      "priority_color": "yellow",
+      "mapped_bucket": "negotiable_constraints",
+      "rationale": "Negotiable or optional notes are preserved for later shortlist review and outreach.",
+      "source_text": null
+    },
+    {
+      "field": "optional_notes",
+      "value": "shortlist names for first review",
+      "priority_color": "yellow",
+      "mapped_bucket": "negotiable_constraints",
+      "rationale": "Optional notes remain negotiable unless explicitly elevated by business review.",
+      "source_text": null
+    }
+  ],
+  "missing_information": [
+    {
+      "code": "missing_field",
+      "severity": "error",
+      "field": "budget_total",
+      "message": "Budget is missing; budget_cap_per_creator and downstream ranking safeguards cannot be derived.",
+      "source_text": null
+    },
+    {
+      "code": "missing_field",
+      "severity": "warning",
+      "field": "compliance_notes",
+      "message": "Compliance notes are missing; human review should confirm ad labeling and sensitive-language restrictions.",
+      "source_text": null
+    },
+    {
+      "code": "missing_field",
+      "severity": "warning",
+      "field": "city",
+      "message": "City or regional constraint is missing; this is acceptable for nationwide campaigns but should be confirmed.",
+      "source_text": null
+    }
+  ],
+  "ambiguities": [],
+  "contradictions": [],
+  "unsupported_requirements": [],
+  "defaults_applied": [
+    "min_fans_count was derived heuristically from budget_total and KPI signals."
+  ]
+}

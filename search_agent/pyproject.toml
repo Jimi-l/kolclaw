@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "search-agent"
+version = "0.1.0"
+description = "Browser-first MVP for Douyin creator discovery and Xingtu enrichment."
+requires-python = ">=3.11"
+dependencies = [
+  "openai>=1.0",
+  "pydantic>=2.7,<3",
+  "playwright>=1.52,<2",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=9,<10",
+]
+
+[project.scripts]
+search-agent = "search_agent.cli:main"
+
+[tool.setuptools]
+packages = ["search_agent"]
+
+[tool.setuptools.package-dir]
+search_agent = "."
+
+[tool.pytest.ini_options]
+testpaths = ["search_agent/tests"]
+pythonpath = ["."]

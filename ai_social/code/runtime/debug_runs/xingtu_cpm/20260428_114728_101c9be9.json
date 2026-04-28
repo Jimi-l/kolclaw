@@ -1,0 +1,643 @@
+{
+  "created_at": "2026-04-28T11:47:28",
+  "status": "ok",
+  "mode": "vlm_only",
+  "upload_filenames": [
+    "x.png"
+  ],
+  "response": {
+    "parse_result": {
+      "extraction_engine_used": "vlm",
+      "vlm_model_used": "fake-vlm",
+      "vlm_raw_response_preview": "{\"natural_plays\":[\"559.4w\"]}",
+      "field_sources": {
+        "price_20s": "vlm",
+        "natural_plays": "vlm",
+        "sponsored_plays": "vlm",
+        "ad_bucketed_mode_play": "derived",
+        "ad_median_play": "derived"
+      },
+      "conflicts": [],
+      "warnings": [],
+      "detected_screenshot_types": [
+        "latest15_personal_chart",
+        "latest15_star_chart",
+        "overview_pricing"
+      ],
+      "missing_required_screenshot_types": [
+        "value_personal_video"
+      ],
+      "extracted_fields_by_screenshot_type": {
+        "overview_pricing": [
+          {
+            "field_name": "price_20s",
+            "raw_value": "168000.0",
+            "normalized_value": 168000.0,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "overview_pricing",
+            "evidence_text": "168000.0"
+          }
+        ],
+        "latest15_personal_chart": [
+          {
+            "field_name": "natural_plays",
+            "raw_value": "5594000",
+            "normalized_value": 5594000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "5594000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "7299000",
+            "normalized_value": 7299000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "7299000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "10803000",
+            "normalized_value": 10803000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "10803000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "19300000",
+            "normalized_value": 19300000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "19300000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "23311000",
+            "normalized_value": 23311000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "23311000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "9312000",
+            "normalized_value": 9312000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "9312000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "5373000",
+            "normalized_value": 5373000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "5373000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "3341000",
+            "normalized_value": 3341000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "3341000"
+          }
+        ],
+        "latest15_star_chart": [
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "8404000",
+            "normalized_value": 8404000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "8404000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "6595000",
+            "normalized_value": 6595000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "6595000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "13330000",
+            "normalized_value": 13330000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "13330000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "3198000",
+            "normalized_value": 3198000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "3198000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "3944000",
+            "normalized_value": 3944000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "3944000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "18590000",
+            "normalized_value": 18590000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "18590000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "19807000",
+            "normalized_value": 19807000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "19807000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "9814000",
+            "normalized_value": 9814000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "9814000"
+          },
+          {
+            "field_name": "ad_bucketed_mode_play",
+            "raw_value": "3571000",
+            "normalized_value": 3571000,
+            "confidence": 1.0,
+            "source": "derived",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "3571000"
+          },
+          {
+            "field_name": "ad_median_play",
+            "raw_value": "9109000",
+            "normalized_value": 9109000,
+            "confidence": 1.0,
+            "source": "derived",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "9109000"
+          }
+        ]
+      },
+      "parsed_input": {
+        "creator_name": null,
+        "natural_plays": [
+          5594000,
+          7299000,
+          10803000,
+          19300000,
+          23311000,
+          9312000,
+          5373000,
+          3341000
+        ],
+        "sponsored_plays": [
+          8404000,
+          6595000,
+          13330000,
+          3198000,
+          3944000,
+          18590000,
+          19807000,
+          9814000
+        ],
+        "personal_chart_points": [],
+        "star_chart_points": [],
+        "post_count_30d": null,
+        "post_count_30d_source": null,
+        "chart_date_count_30d_personal": null,
+        "chart_date_count_30d_star": null,
+        "chart_date_count_30d_total": null,
+        "ad_mode_play": null,
+        "ad_median_play": 9109000,
+        "ad_bucketed_mode_play": 3571000,
+        "price_20s": 168000.0,
+        "price_20_60s": null,
+        "price_60s_plus": null,
+        "platform_expected_cpm": null,
+        "platform_expected_play": null,
+        "personal_chart_min_play": null,
+        "personal_chart_max_play": null,
+        "personal_chart_avg_play": null,
+        "star_chart_min_play": null,
+        "star_chart_max_play": null,
+        "star_chart_avg_play": null,
+        "sponsored_completion_rate": null,
+        "monthly_fan_growth_rate": null,
+        "monthly_connected_user_fan_ratio": null,
+        "monthly_deep_user_fan_ratio": null,
+        "creator_type": null,
+        "cooperate_brands": []
+      },
+      "parser_notes": [
+        "缺少截图类型：value_personal_video"
+      ]
+    },
+    "assessment": {
+      "primary_pool": {
+        "center": 5373000,
+        "low": 4298400,
+        "high": 6447600,
+        "raw_center": 5373000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          5373000,
+          5594000
+        ],
+        "explanation": "最低稳定簇作为初级流量池",
+        "source": "observed_cluster",
+        "confidence": 90.0,
+        "sample_count": 8,
+        "weighted_sample_count": 2.0,
+        "is_estimated": false,
+        "outlier_count": 0,
+        "age_weighted": false
+      },
+      "secondary_pool": {
+        "center": 19300000,
+        "low": 15440000,
+        "high": 23311000,
+        "raw_center": 19300000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          19300000,
+          23311000
+        ],
+        "explanation": "符合初级池倍数范围的稳定簇作为次级流量池",
+        "source": "observed_cluster",
+        "confidence": 86.0,
+        "sample_count": 8,
+        "weighted_sample_count": 2.0,
+        "is_estimated": false,
+        "outlier_count": 0,
+        "age_weighted": false
+      },
+      "commercial_primary_pool": {
+        "center": 3198000,
+        "low": 2558400,
+        "high": 3944000,
+        "raw_center": 3198000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          3198000,
+          3944000
+        ],
+        "explanation": "最低稳定簇作为初级流量池",
+        "source": "observed_cluster",
+        "confidence": 90.0,
+        "sample_count": 8,
+        "weighted_sample_count": 2.0,
+        "is_estimated": false,
+        "outlier_count": 0,
+        "age_weighted": false
+      },
+      "commercial_secondary_pool": {
+        "center": 6595000,
+        "low": 5276000,
+        "high": 8404000,
+        "raw_center": 6595000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          6595000,
+          8404000
+        ],
+        "explanation": "符合初级池倍数范围的稳定簇作为次级流量池",
+        "source": "observed_cluster",
+        "confidence": 86.0,
+        "sample_count": 8,
+        "weighted_sample_count": 2.0,
+        "is_estimated": false,
+        "outlier_count": 0,
+        "age_weighted": false
+      },
+      "commercial_cpm_play_basis": 3198000,
+      "natural_cpm_play_basis": 5373000,
+      "commercial_pool_center_for_cpm": 3198000,
+      "natural_pool_center_for_cpm": 5373000,
+      "commercial_level": "D",
+      "ad_repr_play": 6893800,
+      "predicted_ad_play": 3198000,
+      "weighted_predicted_ad_play": 3156646,
+      "cpm_by_tier": {
+        "20s": {
+          "price": 168000.0,
+          "predicted_cpm": 52.53,
+          "natural_cpm": 31.27,
+          "reason": null,
+          "commercial_cpm_play_basis_source": "star_chart_primary_pool",
+          "natural_cpm_play_basis_source": "natural_primary_pool"
+        },
+        "20-60s": {
+          "price": null,
+          "predicted_cpm": null,
+          "natural_cpm": null,
+          "reason": "缺少报价",
+          "commercial_cpm_play_basis_source": null,
+          "natural_cpm_play_basis_source": null
+        },
+        "60s+": {
+          "price": null,
+          "predicted_cpm": null,
+          "natural_cpm": null,
+          "reason": "缺少报价",
+          "commercial_cpm_play_basis_source": null,
+          "natural_cpm_play_basis_source": null
+        }
+      },
+      "confidence_score": 54.0,
+      "review_flag": true,
+      "review_reasons": [
+        "缺少近30天发文数",
+        "商单分桶众数和中位数差异过大",
+        "星图视频表现弱于自然基线",
+        "缺少 20-60s 报价",
+        "缺少 60s+ 报价"
+      ],
+      "explanations": [
+        "最低稳定簇作为初级流量池",
+        "符合初级池倍数范围的稳定簇作为次级流量池",
+        "商单代表值采用中位数/分桶众数组合，得到 6893800。",
+        "预估商单播放量为 3198000。",
+        "最低稳定簇作为星图商单流量池",
+        "商单能力评估：商单位于初级池范围，系数=0.9",
+        "自然流量趋势：falling，系数=0.81",
+        "星图流量趋势：rising，系数=1.30",
+        "全部流量趋势：rising，系数=1.10",
+        "互动修正系数暂未启用，当前固定为 1.0。"
+      ],
+      "reference": {
+        "platform_expected_cpm": null,
+        "platform_expected_play": null
+      },
+      "debug": {
+        "valid_natural_plays": [
+          3341000,
+          5373000,
+          5594000,
+          7299000,
+          9312000,
+          10803000,
+          19300000,
+          23311000
+        ],
+        "ordered_natural_plays": [
+          5594000,
+          7299000,
+          10803000,
+          19300000,
+          23311000,
+          9312000,
+          5373000,
+          3341000
+        ],
+        "ordered_sponsored_plays": [
+          8404000,
+          6595000,
+          13330000,
+          3198000,
+          3944000,
+          18590000,
+          19807000,
+          9814000
+        ],
+        "ordered_overall_plays": [
+          5594000,
+          7299000,
+          10803000,
+          19300000,
+          23311000,
+          9312000,
+          5373000,
+          3341000,
+          8404000,
+          6595000,
+          13330000,
+          3198000,
+          3944000,
+          18590000,
+          19807000,
+          9814000
+        ],
+        "valid_sponsored_plays": [
+          3198000,
+          3944000,
+          6595000,
+          8404000,
+          9814000,
+          13330000,
+          18590000,
+          19807000
+        ],
+        "activity_discount_factor": 1.0,
+        "post_count_30d": null,
+        "post_count_30d_source": null,
+        "chart_date_count_30d_personal": null,
+        "chart_date_count_30d_star": null,
+        "chart_date_count_30d_total": null,
+        "raw_primary_pool": {
+          "center": 5373000,
+          "low": 4298400,
+          "high": 6447600,
+          "raw_center": 5373000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            5373000,
+            5594000
+          ],
+          "explanation": "最低稳定簇作为初级流量池",
+          "source": "observed_cluster",
+          "confidence": 90.0,
+          "sample_count": 8,
+          "weighted_sample_count": 2.0,
+          "is_estimated": false,
+          "outlier_count": 0,
+          "age_weighted": false
+        },
+        "raw_secondary_pool": {
+          "center": 19300000,
+          "low": 15440000,
+          "high": 23311000,
+          "raw_center": 19300000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            19300000,
+            23311000
+          ],
+          "explanation": "符合初级池倍数范围的稳定簇作为次级流量池",
+          "source": "observed_cluster",
+          "confidence": 86.0,
+          "sample_count": 8,
+          "weighted_sample_count": 2.0,
+          "is_estimated": false,
+          "outlier_count": 0,
+          "age_weighted": false
+        },
+        "raw_commercial_primary_pool": {
+          "center": 3198000,
+          "low": 2558400,
+          "high": 3944000,
+          "raw_center": 3198000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            3198000,
+            3944000
+          ],
+          "explanation": "最低稳定簇作为初级流量池",
+          "source": "observed_cluster",
+          "confidence": 90.0,
+          "sample_count": 8,
+          "weighted_sample_count": 2.0,
+          "is_estimated": false,
+          "outlier_count": 0,
+          "age_weighted": false
+        },
+        "raw_commercial_secondary_pool": {
+          "center": 6595000,
+          "low": 5276000,
+          "high": 8404000,
+          "raw_center": 6595000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            6595000,
+            8404000
+          ],
+          "explanation": "符合初级池倍数范围的稳定簇作为次级流量池",
+          "source": "observed_cluster",
+          "confidence": 86.0,
+          "sample_count": 8,
+          "weighted_sample_count": 2.0,
+          "is_estimated": false,
+          "outlier_count": 0,
+          "age_weighted": false
+        },
+        "commercial_cpm_play_basis_source": "star_chart_primary_pool",
+        "config": {
+          "min_valid_natural_plays": 8,
+          "ad_repr_median_weight": 0.6,
+          "ad_stat_divergence_ratio": 2.5,
+          "price_min": 1.0,
+          "price_max": 10000000.0,
+          "post_count_discount_factors": {
+            "0": 0.0,
+            "1": 3.0,
+            "2": 2.6,
+            "3": 2.4,
+            "4": 2.2,
+            "5": 2.0,
+            "6": 1.0
+          },
+          "bucketed_mode": {
+            "enabled": true,
+            "bucket_ratio": 0.25,
+            "min_bucket_width": 10000,
+            "prefer_lower_bucket_on_tie": true
+          },
+          "clustering": {
+            "adjacent_ratio_threshold": 1.35,
+            "min_cluster_size": 2,
+            "primary_range_ratio": 0.2,
+            "secondary_min_multiple": 1.6,
+            "secondary_max_multiple": 4.5,
+            "fallback_secondary_multiple": 2.5,
+            "secondary_quantile_low": 0.55,
+            "secondary_quantile_high": 0.8,
+            "outlier_iqr_multiplier": 1.5,
+            "outlier_max_to_median_ratio": 3.0
+          },
+          "time_decay": {
+            "days_90_weight": 1.0,
+            "days_180_weight": 0.7,
+            "days_365_weight": 0.4,
+            "older_weight": 0.1
+          },
+          "confidence": {
+            "initial_score": 100.0,
+            "missing_required_field_penalty": 10.0,
+            "low_natural_count_penalty": 25.0,
+            "no_secondary_pool_penalty": 12.0,
+            "ad_stat_divergence_penalty": 10.0,
+            "price_issue_penalty": 8.0,
+            "low_post_count_penalty": 8.0,
+            "very_low_post_count_penalty": 15.0,
+            "review_threshold": 70.0
+          },
+          "weighted_prediction": {
+            "commercial_ability_high_threshold": 0.8,
+            "commercial_ability_good_threshold": 0.6,
+            "commercial_ability_normal_threshold": 0.4,
+            "commercial_ability_low_threshold": 0.2,
+            "trend_min_coefficient": 0.7,
+            "trend_max_coefficient": 1.3,
+            "commercial_coefficient_min": 0.6,
+            "commercial_coefficient_max": 1.2,
+            "engagement_coefficient": 1.0
+          }
+        }
+      },
+      "natural_trend_metrics": {
+        "trend_coefficient": 0.8112363274776268,
+        "trend_direction": "falling",
+        "first_half_median": 9051000,
+        "second_half_median": 7342500
+      },
+      "commercial_trend_metrics": {
+        "trend_coefficient": 1.3,
+        "trend_direction": "rising",
+        "first_half_median": 7499500,
+        "second_half_median": 14202000
+      },
+      "overall_trend_metrics": {
+        "trend_coefficient": 1.096743122027572,
+        "trend_direction": "rising",
+        "first_half_median": 8305500,
+        "second_half_median": 9109000
+      },
+      "trend_metrics": {
+        "trend_coefficient": 0.8112363274776268,
+        "trend_direction": "falling",
+        "first_half_median": 9051000,
+        "second_half_median": 7342500
+      },
+      "commercial_ability": {
+        "ability_score": 0.45,
+        "ability_level": "normal",
+        "coefficient": 0.9,
+        "explanation": "商单位于初级池范围",
+        "historical_commercial_position": "商单位于初级池范围"
+      },
+      "base_predicted_play": 3198000,
+      "final_prediction_factors": {
+        "commercial_ability": 0.9,
+        "overall_trend": 1.096743122027572,
+        "engagement": 1.0
+      }
+    }
+  }
+}

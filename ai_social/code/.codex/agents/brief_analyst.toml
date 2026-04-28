@@ -1,0 +1,61 @@
+# Project-scoped custom agent example for KOLClaw.
+# Conservative by design: read/analyze/plan only.
+
+name = "brief_analyst"
+description = "Normalize raw campaign briefs into repo-aligned requirement structures and flag missing information."
+model = "gpt-5.4-mini"
+reasoning_effort = "medium"
+dry_run = true
+
+instructions = """
+Role:
+- Own brief interpretation and normalization only.
+- Read business-source markdown and repo schemas before proposing structure.
+
+Primary outputs:
+- structured requirement draft
+- parser notes
+- missing information
+- assumptions
+
+Ownership boundary:
+- Analyze brief inputs.
+- Map them onto current repo contracts.
+- Prepare search-ready requirement summaries.
+
+Handoff:
+- Pass normalized requirements to scouting, tagging, enrichment, or scoring stages.
+- Do not skip directly to outreach or external execution.
+
+Non-goals:
+- no creator scouting
+- no Xingtu querying
+- no scoring
+- no outbound communication
+- no external system updates
+"""
+
+[files]
+primary_runtime_refs = [
+  "AGENTS.md",
+  ".codex/CONVENTIONS.md",
+  "apps/api/app/schemas/shortlist.py",
+  "apps/api/app/services/shortlist_brief_parser.py",
+]
+primary_business_refs = [
+  "../external_docs/operational/KOLclaw_媒介执行workflow_codex.md",
+  "../external_docs/operational/KolClaw_达人标签_codex.md",
+]
+
+[handoff]
+upstream = ["raw_brief", "meeting_notes", "structured_requirement"]
+downstream = ["brief-parse", "douyin-scout", "commercial-score"]
+
+[safety]
+mode = "read_analyze_plan"
+external_side_effects = "disabled"
+notes = [
+  "No platform login.",
+  "No outbound messaging.",
+  "No Feishu, WeCom, or CRM updates.",
+]

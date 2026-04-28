@@ -1,0 +1,7 @@
+2026-04-07 14:00:21,601 | INFO | douyin_workflow | Start Douyin discovery workflow (mock_mode=True, target=2, max_minutes=20)
+2026-04-07 14:00:21,703 | INFO | douyin_workflow | Douyin feed ready
+2026-04-07 14:00:21,703 | INFO | douyin_workflow | Loaded mock feed item: 广告样例号
+2026-04-07 14:00:21,704 | INFO | douyin_workflow | Skip feed item: ad
+2026-04-07 14:00:21,704 | INFO | douyin_workflow | Loaded mock feed item: 白昼小熊
+2026-04-07 14:00:21,725 | INFO | douyin_workflow | Loaded mock feed item: 通勤阿琳
+2026-04-07 14:00:21,748 | INFO | douyin_workflow | Douyin discovery workflow finished with status=completed

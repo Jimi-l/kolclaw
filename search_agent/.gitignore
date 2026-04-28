@@ -1,0 +1,9 @@
+.venv/
+.env
+.env.*
+__pycache__/
+.pytest_cache/
+runtime/
+*.pyc
+local_only/*
+!local_only/README.md

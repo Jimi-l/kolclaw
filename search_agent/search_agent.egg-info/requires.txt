@@ -1,0 +1,7 @@
+openai>=1.0
+pydantic<3,>=2.7
+playwright<2,>=1.52
+python-dotenv>=1.0
+
+[dev]
+pytest<10,>=9

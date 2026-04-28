@@ -1,0 +1,2 @@
+[console_scripts]
+search-agent = search_agent.cli:main

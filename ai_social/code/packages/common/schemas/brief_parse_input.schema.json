@@ -1,0 +1,319 @@
+{
+  "$defs": {
+    "BriefParseMetadata": {
+      "additionalProperties": false,
+      "description": "Optional request metadata for tracing how the brief entered the parser.",
+      "properties": {
+        "brief_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Optional caller-provided identifier for the brief.",
+          "title": "Brief Id"
+        },
+        "source_type": {
+          "$ref": "#/$defs/BriefParseSourceType",
+          "default": "unknown",
+          "description": "Where the raw brief text originated."
+        },
+        "source_language": {
+          "$ref": "#/$defs/BriefParseSourceLanguage",
+          "default": "unknown",
+          "description": "Primary language of the source brief."
+        },
+        "dry_run": {
+          "default": true,
+          "description": "Safety switch. The contract currently supports dry_run=true only.",
+          "title": "Dry Run",
+          "type": "boolean"
+        }
+      },
+      "title": "BriefParseMetadata",
+      "type": "object"
+    },
+    "BriefParseSourceLanguage": {
+      "enum": [
+        "zh",
+        "en",
+        "mixed",
+        "unknown"
+      ],
+      "title": "BriefParseSourceLanguage",
+      "type": "string"
+    },
+    "BriefParseSourceType": {
+      "enum": [
+        "manual_text",
+        "meeting_notes",
+        "chat_transcript",
+        "form_input",
+        "unknown"
+      ],
+      "title": "BriefParseSourceType",
+      "type": "string"
+    },
+    "RequirementConstraintBucket": {
+      "additionalProperties": false,
+      "properties": {
+        "creator_categories": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Creator Categories",
+          "type": "array"
+        },
+        "cities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cities",
+          "type": "array"
+        },
+        "content_themes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Content Themes",
+          "type": "array"
+        },
+        "audience_traits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Audience Traits",
+          "type": "array"
+        },
+        "exclusions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "min_fans_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Min Fans Count"
+        },
+        "budget_cap_per_creator": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Cap Per Creator"
+        },
+        "notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notes",
+          "type": "array"
+        }
+      },
+      "title": "RequirementConstraintBucket",
+      "type": "object"
+    },
+    "ShortlistRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "brand": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Brand"
+        },
+        "product_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Name"
+        },
+        "product_sku": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Sku"
+        },
+        "product_category": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Product Category"
+        },
+        "platform": {
+          "default": "douyin",
+          "title": "Platform",
+          "type": "string"
+        },
+        "city": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "City"
+        },
+        "target_audience": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Target Audience",
+          "type": "array"
+        },
+        "kpi_goals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Kpi Goals",
+          "type": "array"
+        },
+        "budget_total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Budget Total"
+        },
+        "content_style_tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Content Style Tags",
+          "type": "array"
+        },
+        "tone_tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tone Tags",
+          "type": "array"
+        },
+        "compliance_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Compliance Notes",
+          "type": "array"
+        },
+        "exclusions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Exclusions",
+          "type": "array"
+        },
+        "optional_notes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Optional Notes",
+          "type": "array"
+        },
+        "keywords": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Keywords",
+          "type": "array"
+        },
+        "hard_constraints": {
+          "$ref": "#/$defs/RequirementConstraintBucket"
+        },
+        "preferred_constraints": {
+          "$ref": "#/$defs/RequirementConstraintBucket"
+        },
+        "negotiable_constraints": {
+          "$ref": "#/$defs/RequirementConstraintBucket"
+        }
+      },
+      "title": "ShortlistRequirement",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Backend-facing request contract for brief parsing.",
+  "properties": {
+    "raw_text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Raw client brief, notes, or pasted requirements to parse.",
+      "title": "Raw Text"
+    },
+    "structured_requirement": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ShortlistRequirement"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Optional already-structured requirement used for validation-only flows."
+    },
+    "metadata": {
+      "$ref": "#/$defs/BriefParseMetadata",
+      "description": "Optional request metadata. dry_run must remain true in this repo."
+    }
+  },
+  "title": "BriefParseInput",
+  "type": "object"
+}

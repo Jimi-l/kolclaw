@@ -1,0 +1,15 @@
+2026-04-07 14:00:21,601 | INFO | browser_runtime | Browser runtime start (mock_mode=True)
+2026-04-07 14:00:21,601 | INFO | browser_runtime | Open douyin session page: https://www.douyin.com
+2026-04-07 14:00:21,652 | INFO | browser_runtime | Check login state for douyin
+2026-04-07 14:00:21,652 | INFO | browser_runtime | Expected login hint: 推荐流已加载，右上角显示已登录头像
+2026-04-07 14:00:21,652 | INFO | browser_runtime | Scroll feed: down
+2026-04-07 14:00:21,703 | INFO | browser_runtime | Close douyin session after 0.10s
+2026-04-07 14:00:26,608 | INFO | browser_runtime | Browser runtime start (mock_mode=True)
+2026-04-07 14:00:26,608 | INFO | browser_runtime | Open xingtu session page: https://www.xingtu.cn
+2026-04-07 14:00:26,659 | INFO | browser_runtime | Check login state for xingtu
+2026-04-07 14:00:26,659 | INFO | browser_runtime | Expected login hint: 进入达人搜索页面
+2026-04-07 14:00:26,659 | INFO | browser_runtime | Close xingtu session after 0.05s
+2026-04-07 14:00:26,660 | INFO | browser_runtime | Saved screenshot placeholder: /home/tuo/project/creator-discovery/data/screenshots/xingtu_curve_白昼小熊.png
+2026-04-07 14:00:26,660 | INFO | browser_runtime | Close xingtu session after 0.00s
+2026-04-07 14:00:26,686 | INFO | browser_runtime | Saved screenshot placeholder: /home/tuo/project/creator-discovery/data/screenshots/xingtu_curve_通勤阿琳.png
+2026-04-07 14:00:26,687 | INFO | browser_runtime | Close xingtu session after 0.00s

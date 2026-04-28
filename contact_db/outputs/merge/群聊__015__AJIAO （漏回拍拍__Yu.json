@@ -1,0 +1,44 @@
+[
+  {
+    "localId": 1,
+    "type": "文本消息",
+    "content": "Okk",
+    "senderDisplayName": "AJIAO （漏回拍拍"
+  },
+  {
+    "localId": 2,
+    "type": "文本消息",
+    "content": "给我个支付宝",
+    "senderDisplayName": "AJIAO （漏回拍拍"
+  },
+  {
+    "localId": 3,
+    "type": "文本消息",
+    "content": "我暂时打不了银行卡",
+    "senderDisplayName": "AJIAO （漏回拍拍"
+  },
+  {
+    "localId": 4,
+    "type": "文本消息",
+    "content": "核对一下金额发我",
+    "senderDisplayName": "AJIAO （漏回拍拍"
+  },
+  {
+    "localId": 5,
+    "type": "文本消息",
+    "content": "Ok",
+    "senderDisplayName": "AJIAO （漏回拍拍"
+  },
+  {
+    "localId": 6,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "AJIAO （漏回拍拍"
+  },
+  {
+    "localId": 7,
+    "type": "文本消息",
+    "content": "好的 收到",
+    "senderDisplayName": "Yu"
+  }
+]

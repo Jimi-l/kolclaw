@@ -1,0 +1,108 @@
+{
+  "weflow": {
+    "version": "1.0.3",
+    "exportedAt": 1776930966,
+    "generator": "extract_nested_forwarded_chats"
+  },
+  "session": {
+    "wxid": "record_0091",
+    "nickname": "鲸娱传媒商务（9:00-18:00）",
+    "remark": "",
+    "displayName": "小被罩儿 & 鲸娱传媒商务（9:00-18:00）",
+    "participants": [
+      "小被罩儿",
+      "鲸娱传媒商务（9:00-18:00）"
+    ],
+    "pairKey": "小被罩儿__鲸娱传媒商务（9:00-18:00）",
+    "type": "friend",
+    "lastTimestamp": 1776909835,
+    "messageCount": 4,
+    "avatar": "",
+    "sourceFile": "私聊_文件传输助手.json",
+    "sourceTopMessageIndex": 0,
+    "recordOrder": 91,
+    "lineRange": [
+      218,
+      235
+    ],
+    "startKind": "title_start"
+  },
+  "messages": [
+    {
+      "localId": 1,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "——对公入库需要信息：\n\n辛苦给下：\n\n联系人姓名：\n\n电话：\n\n联系地址：\n\n可回复确认信息的邮箱：\n\n公司开票信息（开户行名称及账号，专票/普票，发票类型）：\n\n营业执照（图片形式）：",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0091_0001",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 218,
+      "sourceLineEnd": 232,
+      "recordOrder": 91,
+      "mergedOrder": null
+    },
+    {
+      "localId": 2,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "营业执照要最新版本",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0091_0002",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 233,
+      "sourceLineEnd": 233,
+      "recordOrder": 91,
+      "mergedOrder": null
+    },
+    {
+      "localId": 3,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "好的",
+      "isSend": 0,
+      "senderUsername": "participant_鲸娱传媒商务_9_00_18_00",
+      "senderDisplayName": "鲸娱传媒商务（9:00-18:00）",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0091_0003",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 234,
+      "sourceLineEnd": 234,
+      "recordOrder": 91,
+      "mergedOrder": null
+    },
+    {
+      "localId": 4,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "稍等哈",
+      "isSend": 0,
+      "senderUsername": "participant_鲸娱传媒商务_9_00_18_00",
+      "senderDisplayName": "鲸娱传媒商务（9:00-18:00）",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0091_0004",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 235,
+      "sourceLineEnd": 235,
+      "recordOrder": 91,
+      "mergedOrder": null
+    }
+  ]
+}

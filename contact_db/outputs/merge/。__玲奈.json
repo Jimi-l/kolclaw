@@ -1,0 +1,410 @@
+[
+  {
+    "localId": 1,
+    "type": "文本消息",
+    "content": "我通过了你的朋友验证请求，现在我们可以开始聊天了",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 2,
+    "type": "文本消息",
+    "content": "哈喽宝子，我是这边负责的媒介，这边辛苦您了，关于车马费用您一般是给您打对私账",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 3,
+    "type": "文本消息",
+    "content": "哈喽宝子，我是这边负责的媒介，这边辛苦您了，关于车马费用您一般是给您打对私账号嘛，车马费800可以不",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 4,
+    "type": "文本消息",
+    "content": "或者直接返点20%可以吗[可怜] 差旅我就自付了   算了下前面付了1k多 还要付差旅2000[捂脸]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 5,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 6,
+    "type": "文本消息",
+    "content": "宝子，下单的时候返点已经下好了，返点目前改不了，我还能再申请多100块，900你看行不",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 7,
+    "type": "文本消息",
+    "content": "[破涕为笑]  唉那行吧 是不是会投流呀",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 8,
+    "type": "文本消息",
+    "content": "那几时能确定咧 要买票了 等下变贵了[破涕为笑]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 9,
+    "type": "文本消息",
+    "content": "稍等我尽快确认",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 10,
+    "type": "文本消息",
+    "content": "宝子，确定了，订票吧，24号早点去现场",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 11,
+    "type": "文本消息",
+    "content": "地点在哪",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 12,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 13,
+    "type": "文本消息",
+    "content": "稍等",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 14,
+    "type": "文本消息",
+    "content": "成都世贸广场1楼",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 15,
+    "type": "文本消息",
+    "content": "宝子，这里哈",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 16,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 17,
+    "type": "文本消息",
+    "content": "第一个",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 18,
+    "type": "文本消息",
+    "content": "不在市中心 也是够远的[破涕为笑]  能临时搭建完？",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 19,
+    "type": "文本消息",
+    "content": "客户给的就是这个",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 20,
+    "type": "文本消息",
+    "content": "宝子，到活动场地了没",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 21,
+    "type": "文本消息",
+    "content": "[语音通话]",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 22,
+    "type": "文本消息",
+    "content": "宝子，车马费，我这边在走流程，不会特别慢，我会催促整个流程哈",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 23,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 24,
+    "type": "文本消息",
+    "content": "客气客气，后续有项目还找你哈",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 25,
+    "type": "文本消息",
+    "content": "宝子，付款方式先提前要一下",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 26,
+    "type": "文本消息",
+    "content": "收款信息给一个吧\n1.姓名：\n2. 身份证号 （需要和姓名一致）：\n3.银行卡号 （需要和姓名一致，信用卡不可以）：\n4.手机号（需要和银行留存的一致）：\n5.开户行（不用具体到支行）：",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 27,
+    "type": "文本消息",
+    "content": "姓名:李艳玲\n身份证450103199012110549\n交通银行\n账号6222620760005935310\n手机13807710293",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 28,
+    "type": "文本消息",
+    "content": "收到啦~",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 29,
+    "type": "文本消息",
+    "content": "福建万青信息公司是你们不？",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 30,
+    "type": "文本消息",
+    "content": "是滴",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 31,
+    "type": "文本消息",
+    "content": "收到费用啦~",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 32,
+    "type": "文本消息",
+    "content": "我忘给你截图了",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 33,
+    "type": "文本消息",
+    "content": "收到啦！好迅速哦 你们公司真好",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 34,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 35,
+    "type": "文本消息",
+    "content": "哈哈这次巧了，赶上一波付款，直接给你付了",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 36,
+    "type": "文本消息",
+    "content": "咱们多合作",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 37,
+    "type": "文本消息",
+    "content": "你们是哪个机构呀？[偷笑]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 38,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 39,
+    "type": "文本消息",
+    "content": "微梦传媒滴",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 40,
+    "type": "文本消息",
+    "content": "合作愉快",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 41,
+    "type": "文本消息",
+    "content": "宝子，之前公司打款给您多打了50.4，应该是900，结果打成了950.4.宝子，辛苦您核对一下入账金额是不是950.4，公司账单没对上",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 42,
+    "type": "文本消息",
+    "content": "是",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 43,
+    "type": "文本消息",
+    "content": "宝子，辛苦您帮我返一下50.4的款，",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 44,
+    "type": "文本消息",
+    "content": "卡号：6217 9206 5245 0029\n户主：赵文\n开户行：浦发银行北京建国路支行",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 45,
+    "type": "文本消息",
+    "content": "如果有手续费，您和我说，手续费我补您",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 46,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 47,
+    "type": "文本消息",
+    "content": "谢谢宝子，感恩",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 48,
+    "type": "文本消息",
+    "content": "！！！！",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 49,
+    "type": "文本消息",
+    "content": "你最快了！！！",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 50,
+    "type": "文本消息",
+    "content": "屈臣氏广州的项目也是你们的吗哈哈还可以去吗[偷笑]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 51,
+    "type": "文本消息",
+    "content": "好像不行，得过几天",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 52,
+    "type": "文本消息",
+    "content": "太近了",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 53,
+    "type": "文本消息",
+    "content": "下个月",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 54,
+    "type": "文本消息",
+    "content": "有活动必定找你",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 55,
+    "type": "文本消息",
+    "content": "我还有个小号[偷笑]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 56,
+    "type": "文本消息",
+    "content": "Angela李晓星\n粉丝量:54000\n赞藏量:340000\n主页链接https://www.xiaohongshu.com/user/profile/5a688d14e8ac2b15304d9e85?xhsshare=CopyLink&appuid=5a688d14e8ac2b15304d9e85&apptime=1619017276\n图文报备6000",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 57,
+    "type": "文本消息",
+    "content": "哎我，我提报看看",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 58,
+    "type": "文本消息",
+    "content": "我来了～屈臣氏返点转哪里",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 59,
+    "type": "文本消息",
+    "content": "稍等宝，你也太快了！",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 60,
+    "type": "文本消息",
+    "content": "刚到立马",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 61,
+    "type": "文本消息",
+    "content": "对私无需开票返点辛苦打到这个企业支付宝：cn@microdreams.com 北京微梦传媒股份有限公司；麻烦付款给个截图，然后给下返点账号和姓名，我们方便查账~\n\n如需要对公开票的话 ，开票信息，营业执照、如果是专票还要给到一般纳税人证明 这些也给我一下哈～然后再给我个邮箱 ，我们需要发送确认邮件 ，收到后回我个确认哈~\n\n对公返点打到以下企业银行卡，付款后辛苦给个截图\n公司名称：北京微梦传媒股份有限公司\n开户行：北京银行股份有限公司互联网金融中心支行\n账   号：20000031841700010612542\n行   号：313100002003",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 62,
+    "type": "文本消息",
+    "content": "10000返点32%，一共3200，和你核对一下",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 63,
+    "type": "文本消息",
+    "content": "是不",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 64,
+    "type": "文本消息",
+    "content": "对",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 65,
+    "type": "文本消息",
+    "content": "好的，您对私就打支付宝就行，辛苦之后截个图片就行～",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 66,
+    "type": "文本消息",
+    "content": "[消息]",
+    "senderDisplayName": "玲奈"
+  },
+  {
+    "localId": 67,
+    "type": "文本消息",
+    "content": "收到，辛苦了，[拳头]",
+    "senderDisplayName": "。"
+  },
+  {
+    "localId": 68,
+    "type": "文本消息",
+    "content": "小红书-屈臣氏探店-玲奈Sama",
+    "senderDisplayName": "。"
+  }
+]

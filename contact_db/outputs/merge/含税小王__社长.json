@@ -1,0 +1,104 @@
+[
+  {
+    "localId": 1,
+    "type": "文本消息",
+    "content": "小红书非报备原创图文和供稿图文的2月价格再给下吧",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 2,
+    "type": "文本消息",
+    "content": "非报备原创图文2300，稿前一半发前结清，供稿图文2000，发前结清",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 3,
+    "type": "文本消息",
+    "content": "好的",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 4,
+    "type": "文本消息",
+    "content": "非报备原创图文2300，稿前一半发前结清，供稿图文2000，发前结清",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 5,
+    "type": "文本消息",
+    "content": "好的",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 6,
+    "type": "文本消息",
+    "content": "宝，现在小红书非报备原创图文价格多少呀，要一个税前价格哈~",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 7,
+    "type": "文本消息",
+    "content": "宝，现在是2800",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 8,
+    "type": "文本消息",
+    "content": "还是刊前结清哈",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 9,
+    "type": "文本消息",
+    "content": "是的，宝",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 10,
+    "type": "文本消息",
+    "content": "因为现在代付平台会自动扣除个人所得税，不确定咱们的扣除比例，无法预估到手金额，所以我们按照税前金额结算哈~",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 11,
+    "type": "文本消息",
+    "content": "嗯，可以的",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 12,
+    "type": "文本消息",
+    "content": "好的",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 13,
+    "type": "文本消息",
+    "content": "1月25-30号档期 还有嘛？",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 14,
+    "type": "文本消息",
+    "content": "有的，宝，27可以",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 15,
+    "type": "文本消息",
+    "content": "对了，宝，什么项目你说下，我这里好备注锁档",
+    "senderDisplayName": "社长"
+  },
+  {
+    "localId": 16,
+    "type": "文本消息",
+    "content": "小红书快消项目",
+    "senderDisplayName": "含税小王"
+  },
+  {
+    "localId": 17,
+    "type": "文本消息",
+    "content": "[动画表情]",
+    "senderDisplayName": "社长"
+  }
+]

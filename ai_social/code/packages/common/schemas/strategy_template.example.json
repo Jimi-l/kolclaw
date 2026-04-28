@@ -1,0 +1,35 @@
+{
+  "template_id": "fashion_event_default",
+  "template_name": "Fashion Event Default",
+  "description": "Baseline strategy for offline fashion-show amplification on Douyin using style-forward mid-tier creators.",
+  "hard_filters": {
+    "platform_match": true,
+    "min_fans_count": 80000,
+    "min_female_ratio": 0.55,
+    "max_candidate_price": null,
+    "max_price_share_of_budget": 0.32,
+    "require_creator_type_overlap": true
+  },
+  "soft_preferences": {
+    "preferred_cities": ["shanghai"],
+    "preferred_experience_tags": ["offline event", "fashion week", "brand launch", "runway recap"],
+    "preferred_content_tags": ["outfit", "show", "transition", "runway", "event vlog"],
+    "preferred_style_tags": ["stylish", "premium", "city chic", "editorial"],
+    "growth_floor": 0.03
+  },
+  "score_weights": {
+    "brief_match": 0.3,
+    "content_fit": 0.2,
+    "commercial_efficiency": 0.2,
+    "audience_fit": 0.15,
+    "growth_signal": 0.15
+  },
+  "platform_mapping": {
+    "douyin": ["douyin", "抖音"]
+  },
+  "manual_review_points": [
+    "Check whether the creator can attend or rapidly cover an offline activation in Shanghai.",
+    "Verify that recent branded work still feels native to outfit and runway-related content.",
+    "Review if pricing includes usage rights or offline appearance requirements."
+  ]
+}

@@ -1,0 +1,278 @@
+{
+  "structured_requirement": {
+    "brand": "Velvet Lab",
+    "product_name": "maybe lip glaze or serum line",
+    "product_sku": null,
+    "product_category": "美妆",
+    "platform": "douyin",
+    "city": "shanghai",
+    "target_audience": [
+      "女性",
+      "都市白领",
+      "年轻消费人群",
+      "精致消费人群"
+    ],
+    "kpi_goals": [
+      "播放量稳定",
+      "互动质量"
+    ],
+    "budget_total": null,
+    "content_style_tags": [
+      "高级感"
+    ],
+    "tone_tags": [],
+    "compliance_notes": [],
+    "exclusions": [
+      "pets"
+    ],
+    "optional_notes": [],
+    "keywords": [
+      "Velvet Lab",
+      "maybe lip glaze or serum line",
+      "美妆",
+      "shanghai",
+      "宠物",
+      "女性",
+      "都市白领",
+      "年轻消费人群",
+      "精致消费人群",
+      "播放量稳定",
+      "互动质量",
+      "高级感"
+    ],
+    "hard_constraints": {
+      "creator_categories": [
+        "美妆",
+        "宠物"
+      ],
+      "cities": [
+        "shanghai"
+      ],
+      "content_themes": [
+        "高级感"
+      ],
+      "audience_traits": [
+        "女性",
+        "都市白领"
+      ],
+      "exclusions": [
+        "pets"
+      ],
+      "min_fans_count": 100000,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Must: beauty creators with pet-friendly home vibe"
+      ]
+    },
+    "preferred_constraints": {
+      "creator_categories": [],
+      "cities": [],
+      "content_themes": [
+        "高级感"
+      ],
+      "audience_traits": [
+        "女性",
+        "都市白领",
+        "年轻消费人群",
+        "精致消费人群"
+      ],
+      "exclusions": [],
+      "min_fans_count": null,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Prefer: shanghai or hangzhou, but maybe anywhere is fine",
+        "Prefer creators whose tags visibly match the brand brief."
+      ]
+    },
+    "negotiable_constraints": {
+      "creator_categories": [],
+      "cities": [],
+      "content_themes": [],
+      "audience_traits": [],
+      "exclusions": [],
+      "min_fans_count": null,
+      "budget_cap_per_creator": null,
+      "notes": [
+        "Optional: livestream collab also okay"
+      ]
+    }
+  },
+  "parse_status": "needs_review",
+  "parser_notes": [
+    "Parsed brief with deterministic keyword and pattern rules.",
+    "Defaulted platform to `douyin` / Xingtu-compatible flow.",
+    "Detected primary creator category `美妆`.",
+    "Detected city `shanghai`."
+  ],
+  "priority_signals": [
+    {
+      "field": "explicit_priority_note",
+      "value": "Must: beauty creators with pet-friendly home vibe",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Must: beauty creators with pet-friendly home vibe"
+    },
+    {
+      "field": "explicit_priority_note",
+      "value": "Optional: livestream collab also okay",
+      "priority_color": "yellow",
+      "mapped_bucket": "negotiable_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Optional: livestream collab also okay"
+    },
+    {
+      "field": "explicit_priority_note",
+      "value": "Prefer: shanghai or hangzhou, but maybe anywhere is fine",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Explicit priority language in the brief was preserved as a structured signal.",
+      "source_text": "Prefer: shanghai or hangzhou, but maybe anywhere is fine"
+    },
+    {
+      "field": "hard_constraints.creator_categories",
+      "value": "美妆",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Core category signals are mapped into hard_constraints for downstream filtering.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.creator_categories",
+      "value": "宠物",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Core category signals are mapped into hard_constraints for downstream filtering.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.cities",
+      "value": "shanghai",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Explicit city constraints or normalized city signals are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.audience_traits",
+      "value": "女性",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Audience traits needed for shortlist filtering are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "hard_constraints.audience_traits",
+      "value": "都市白领",
+      "priority_color": "red",
+      "mapped_bucket": "hard_constraints",
+      "rationale": "Audience traits needed for shortlist filtering are mapped into hard_constraints.",
+      "source_text": null
+    },
+    {
+      "field": "preferred_constraints.notes",
+      "value": "Prefer: shanghai or hangzhou, but maybe anywhere is fine",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Preference notes remain visible for scouting and ranking without becoming hard blockers.",
+      "source_text": null
+    },
+    {
+      "field": "preferred_constraints.notes",
+      "value": "Prefer creators whose tags visibly match the brand brief.",
+      "priority_color": "green",
+      "mapped_bucket": "preferred_constraints",
+      "rationale": "Preference notes remain visible for scouting and ranking without becoming hard blockers.",
+      "source_text": null
+    },
+    {
+      "field": "negotiable_constraints.notes",
+      "value": "Optional: livestream collab also okay",
+      "priority_color": "yellow",
+      "mapped_bucket": "negotiable_constraints",
+      "rationale": "Negotiable or optional notes are preserved for later shortlist review and outreach.",
+      "source_text": null
+    }
+  ],
+  "missing_information": [
+    {
+      "code": "missing_field",
+      "severity": "error",
+      "field": "budget_total",
+      "message": "Budget is missing; budget_cap_per_creator and downstream ranking safeguards cannot be derived.",
+      "source_text": null
+    },
+    {
+      "code": "missing_field",
+      "severity": "warning",
+      "field": "compliance_notes",
+      "message": "Compliance notes are missing; human review should confirm ad labeling and sensitive-language restrictions.",
+      "source_text": null
+    }
+  ],
+  "ambiguities": [
+    {
+      "code": "ambiguous_field",
+      "severity": "warning",
+      "field": "budget_total",
+      "message": "Detected ambiguous language for `budget_total`. Human review should confirm the exact requirement.",
+      "source_text": "Budget: around 50000左右"
+    },
+    {
+      "code": "ambiguous_field",
+      "severity": "warning",
+      "field": "kpi_goals",
+      "message": "Detected ambiguous language for `kpi_goals`. Human review should confirm the exact requirement.",
+      "source_text": "KPI: decent"
+    },
+    {
+      "code": "ambiguous_field",
+      "severity": "warning",
+      "field": "platform",
+      "message": "Detected ambiguous language for `platform`. Human review should confirm the exact requirement.",
+      "source_text": "Platform: xiaohongshu or douyin, maybe"
+    },
+    {
+      "code": "ambiguous_field",
+      "severity": "warning",
+      "field": "target_audience",
+      "message": "Detected ambiguous language for `target_audience`. Human review should confirm the exact requirement.",
+      "source_text": "audience: broad"
+    },
+    {
+      "code": "ambiguous_field",
+      "severity": "warning",
+      "field": "budget_total",
+      "message": "Budget was discussed but could not be normalized into a numeric total.",
+      "source_text": "budget mentioned without a parsable numeric total"
+    }
+  ],
+  "contradictions": [
+    {
+      "code": "contradictory_field",
+      "severity": "error",
+      "field": "exclusions",
+      "message": "Category `宠物` is both requested and excluded.",
+      "source_text": "宠物"
+    }
+  ],
+  "unsupported_requirements": [
+    {
+      "code": "unsupported_requirement",
+      "severity": "error",
+      "field": "platform",
+      "message": "Current V1 shortlist flow supports Douyin/Xingtu only.",
+      "source_text": "xiaohongshu"
+    },
+    {
+      "code": "unsupported_requirement",
+      "severity": "error",
+      "field": "content_form",
+      "message": "Current V1 brief-parse contract targets short-video shortlist generation, not live-stream workflows.",
+      "source_text": "livestream"
+    }
+  ],
+  "defaults_applied": [
+    "min_fans_count was derived heuristically from budget_total and KPI signals."
+  ]
+}

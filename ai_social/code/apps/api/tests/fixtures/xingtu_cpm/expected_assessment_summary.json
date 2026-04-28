@@ -1,0 +1,20 @@
+{
+  "primary_pool_center": 6267500,
+  "secondary_pool_center": 16677000,
+  "commercial_primary_pool_center": 9740000,
+  "commercial_secondary_pool_center": 23283000,
+  "commercial_pool_center_for_cpm": 9740000,
+  "natural_pool_center_for_cpm": 6267500,
+  "commercial_level": "B",
+  "ad_repr_play": 15487600,
+  "predicted_ad_play": 9740000,
+  "weighted_predicted_ad_play": 11673900,
+  "confidence_score": 100.0,
+  "review_flag": false,
+  "cpm_20s_predicted": 30.8,
+  "cpm_20s_natural": 47.87,
+  "predicted_source": "star_chart_pool",
+  "natural_source": "natural_primary_pool",
+  "platform_expected_cpm": 26.1,
+  "platform_expected_play": 11513000
+}

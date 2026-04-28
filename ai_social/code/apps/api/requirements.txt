@@ -1,0 +1,7 @@
+fastapi==0.115.8
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+python-multipart==0.0.20
+rapidocr_onnxruntime==1.4.4
+paddleocr==3.4.1
+paddlepaddle==3.3.1

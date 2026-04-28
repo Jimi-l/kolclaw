@@ -1,0 +1,21 @@
+{
+  "detected_screenshot_types": [
+    "latest15_personal_chart",
+    "latest15_star_chart",
+    "overview_pricing",
+    "value_personal_video"
+  ],
+  "missing_required_screenshot_types": [],
+  "parsed_input": {
+    "natural_plays_count": 15,
+    "sponsored_plays_count": 15,
+    "post_count_30d": 7,
+    "ad_bucketed_mode_play": 14824000,
+    "ad_median_play": 15930000,
+    "price_20s": 300000.0,
+    "price_20_60s": 300000.0,
+    "price_60s_plus": 320000.0,
+    "platform_expected_cpm": 26.1,
+    "platform_expected_play": 11513000
+  }
+}

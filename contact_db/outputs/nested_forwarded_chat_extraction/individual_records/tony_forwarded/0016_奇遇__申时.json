@@ -1,0 +1,108 @@
+{
+  "weflow": {
+    "version": "1.0.3",
+    "exportedAt": 1776930966,
+    "generator": "extract_nested_forwarded_chats"
+  },
+  "session": {
+    "wxid": "record_0016",
+    "nickname": "申时",
+    "remark": "",
+    "displayName": "奇遇 & 申时",
+    "participants": [
+      "奇遇",
+      "申时"
+    ],
+    "pairKey": "奇遇__申时",
+    "type": "friend",
+    "lastTimestamp": 1776926579,
+    "messageCount": 4,
+    "avatar": "",
+    "sourceFile": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+    "sourceTopMessageIndex": 1,
+    "recordOrder": 16,
+    "lineRange": [
+      103,
+      123
+    ],
+    "startKind": "sentinel_start"
+  },
+  "messages": [
+    {
+      "localId": 1,
+      "createTime": 1776926579,
+      "formattedTime": "2026-04-23 14:42:59",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "申时 品牌：明日之后 档期：4.16-4.19 平台：抖音+B站 方向：灵笼ip联动合作 ----------------------------- 辛苦按顺序反馈 1、4.16-4.19是否有档期： 2、星",
+      "isSend": 1,
+      "senderUsername": "participant_奇遇",
+      "senderDisplayName": "奇遇",
+      "source": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "platformMessageId": "record_0016_0001",
+      "sourceFile": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "sourceTopMessageIndex": 1,
+      "sourceLineStart": 103,
+      "sourceLineEnd": 103,
+      "recordOrder": 16,
+      "mergedOrder": null
+    },
+    {
+      "localId": 2,
+      "createTime": 1776926579,
+      "formattedTime": "2026-04-23 14:42:59",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "老师 看看明日的需求还有档期不，帮忙填下价格和权益呀",
+      "isSend": 1,
+      "senderUsername": "participant_奇遇",
+      "senderDisplayName": "奇遇",
+      "source": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "platformMessageId": "record_0016_0002",
+      "sourceFile": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "sourceTopMessageIndex": 1,
+      "sourceLineStart": 104,
+      "sourceLineEnd": 104,
+      "recordOrder": 16,
+      "mergedOrder": null
+    },
+    {
+      "localId": 3,
+      "createTime": 1776926579,
+      "formattedTime": "2026-04-23 14:42:59",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "申时\n品牌：明日之后\n档期：4.16-4.19\n平台：抖音+B站\n方向：灵笼ip联动合作\n-----------------------------\n辛苦按顺序反馈\n1、4.16-4.19是否有档期：有\n2、星图60s+报价及返点：35000 20%\n3、花火定制视频报价及返点：\n4、抖音+B站打包是否有额外优惠价格：双平台打包43000 20%\n4、是否可以保价锁价到执行：可以\n5、是否有其他平台免费分发（辛苦注明平台）：小红书\n6、是否可以免费挂组件：可以\n7、是否可以免费授权信息流3个月：可以\n8、是否可以免费授权3个月二剪视频：可以\n9、是否可以根据以往视频播放量保播放（抖音15日CPM≤30，B站15日CPM≤250，如不可达人最低能保多少播放）：不保量 播放量可参考往期同类型商单\n10、网易内部要求合作达人必须分发网易内部平台（网易大神、网易云）这个很重要辛苦确认是否能配合注册分发（应用商店下载app手机号一键登录即可，如不能分发无法合作）：可以",
+      "isSend": 0,
+      "senderUsername": "participant_申时",
+      "senderDisplayName": "申时",
+      "source": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "platformMessageId": "record_0016_0003",
+      "sourceFile": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "sourceTopMessageIndex": 1,
+      "sourceLineStart": 105,
+      "sourceLineEnd": 122,
+      "recordOrder": 16,
+      "mergedOrder": null
+    },
+    {
+      "localId": 4,
+      "createTime": 1776926579,
+      "formattedTime": "2026-04-23 14:42:59",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "收到",
+      "isSend": 1,
+      "senderUsername": "participant_奇遇",
+      "senderDisplayName": "奇遇",
+      "source": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "platformMessageId": "record_0016_0004",
+      "sourceFile": "私聊_微梦传媒&像素绽放的Tony华立辉.json",
+      "sourceTopMessageIndex": 1,
+      "sourceLineStart": 123,
+      "sourceLineEnd": 123,
+      "recordOrder": 16,
+      "mergedOrder": null
+    }
+  ]
+}

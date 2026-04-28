@@ -1,0 +1,1417 @@
+{
+  "created_at": "2026-04-16T17:56:04",
+  "status": "ok",
+  "mode": "vlm_only",
+  "upload_filenames": [
+    "2d8ce128558f0eb8cbb537d86e1f37e6.png",
+    "01374a960855a8de3b58a1be191c65a4.png",
+    "28641c0e4e59d815f309d663b9a85bd7.png",
+    "f0d6eb9ae909917ded15bb7db9b36d8a.png"
+  ],
+  "response": {
+    "parse_result": {
+      "extraction_engine_used": "vlm",
+      "vlm_model_used": "doubao-seed-2.0-pro",
+      "vlm_raw_response_preview": "{\n    \"detected_screenshot_types\": [\"overview_pricing\", \"value_personal_video\", \"latest15_personal_chart\", \"latest15_star_chart\"],\n    \"creator_name\": \"夏叔厨房\",\n    \"price_20s\": 168000,\n    \"price_20_60s\": 188000,\n    \"price_60s_plus\": 259800,\n    \"post_count_30d\": null,\n    \"platform_expected_cpm\": 16.3,\n    \"platform_expected_play\": 11514000,\n    \"personal_chart_min_play\": 3867000,\n    \"personal_chart_max_play\": 33353000,\n    \"personal_chart_avg_play\": 14219000,\n    \"star_chart_min_play\": 2939000,\n    \"star_chart_max_play\": 44842000,\n    \"star_chart_avg_play\": 11994000,\n    \"ad_mode_play\": null,\n    \"ad_median_play\": 4327000,\n    \"monthly_fan_growth_rate\": 0.0099,\n    \"natural_plays\": [9073000,16526000,14488000,8741000,19211000,6836000,17339000,16476000,23041000,33353000,4250000,21597000,13531000,3867000,4963000],\n    \"sponsored_plays\": [6062000,7462000,6805000,44842000,17303000,9578000,6288000,7936000,8404000,35229000,2939000,9819000,5327000,6492000,5425000],\n    \"personal_chart_points\": [\n        {\"date\":\"26/03/12\",\"play\":9073000,\"image_name\":\"0_2d8ce128558f0eb8cbb537d86e1f37e6.png\"},\n        {\"date\":\"26/03/14\",\"play\":16526000,\"image_name\":\"0_2d8ce128558f0eb8cbb537d86e1f37e6.png\"",
+      "field_sources": {
+        "creator_name": "vlm",
+        "price_20s": "vlm",
+        "price_20_60s": "vlm",
+        "price_60s_plus": "vlm",
+        "monthly_fan_growth_rate": "vlm",
+        "platform_expected_cpm": "vlm",
+        "platform_expected_play": "vlm",
+        "personal_chart_min_play": "vlm",
+        "personal_chart_max_play": "vlm",
+        "personal_chart_avg_play": "vlm",
+        "natural_plays": "vlm",
+        "personal_chart_points": "vlm",
+        "star_chart_min_play": "vlm",
+        "star_chart_max_play": "vlm",
+        "star_chart_avg_play": "vlm",
+        "sponsored_plays": "vlm",
+        "star_chart_points": "vlm",
+        "ad_bucketed_mode_play": "derived",
+        "ad_median_play": "derived",
+        "post_count_30d": "derived"
+      },
+      "conflicts": [],
+      "warnings": [],
+      "detected_screenshot_types": [
+        "latest15_personal_chart",
+        "latest15_star_chart",
+        "overview_pricing",
+        "value_personal_video"
+      ],
+      "missing_required_screenshot_types": [],
+      "extracted_fields_by_screenshot_type": {
+        "overview_pricing": [
+          {
+            "field_name": "creator_name",
+            "raw_value": "夏叔厨房",
+            "normalized_value": "夏叔厨房",
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "overview_pricing",
+            "evidence_text": "夏叔厨房"
+          },
+          {
+            "field_name": "price_20s",
+            "raw_value": "168000.0",
+            "normalized_value": 168000.0,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "overview_pricing",
+            "evidence_text": "168000.0"
+          },
+          {
+            "field_name": "price_20_60s",
+            "raw_value": "188000.0",
+            "normalized_value": 188000.0,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "overview_pricing",
+            "evidence_text": "188000.0"
+          },
+          {
+            "field_name": "price_60s_plus",
+            "raw_value": "259800.0",
+            "normalized_value": 259800.0,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "overview_pricing",
+            "evidence_text": "259800.0"
+          },
+          {
+            "field_name": "monthly_fan_growth_rate",
+            "raw_value": "0.0099",
+            "normalized_value": 0.0099,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "overview_pricing",
+            "evidence_text": "0.0099"
+          }
+        ],
+        "value_personal_video": [
+          {
+            "field_name": "platform_expected_cpm",
+            "raw_value": "16.3",
+            "normalized_value": 16.3,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "value_personal_video",
+            "evidence_text": "16.3"
+          },
+          {
+            "field_name": "platform_expected_play",
+            "raw_value": "11514000",
+            "normalized_value": 11514000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "value_personal_video",
+            "evidence_text": "11514000"
+          }
+        ],
+        "latest15_personal_chart": [
+          {
+            "field_name": "personal_chart_min_play",
+            "raw_value": "3867000",
+            "normalized_value": 3867000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "3867000"
+          },
+          {
+            "field_name": "personal_chart_max_play",
+            "raw_value": "33353000",
+            "normalized_value": 33353000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "33353000"
+          },
+          {
+            "field_name": "personal_chart_avg_play",
+            "raw_value": "14219000",
+            "normalized_value": 14219000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "14219000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "9073000",
+            "normalized_value": 9073000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "9073000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "16526000",
+            "normalized_value": 16526000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "16526000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "14488000",
+            "normalized_value": 14488000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "14488000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "8741000",
+            "normalized_value": 8741000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "8741000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "19211000",
+            "normalized_value": 19211000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "19211000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "6836000",
+            "normalized_value": 6836000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "6836000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "17339000",
+            "normalized_value": 17339000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "17339000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "16476000",
+            "normalized_value": 16476000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "16476000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "23041000",
+            "normalized_value": 23041000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "23041000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "33353000",
+            "normalized_value": 33353000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "33353000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "4250000",
+            "normalized_value": 4250000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "4250000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "21597000",
+            "normalized_value": 21597000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "21597000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "13531000",
+            "normalized_value": 13531000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "13531000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "3867000",
+            "normalized_value": 3867000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "3867000"
+          },
+          {
+            "field_name": "natural_plays",
+            "raw_value": "4963000",
+            "normalized_value": 4963000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "4963000"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/12', 'play': 9073000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/12",
+              "play": 9073000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/12', 'play': 9073000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/14', 'play': 16526000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/14",
+              "play": 16526000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/14', 'play': 16526000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/17', 'play': 14488000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/17",
+              "play": 14488000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/17', 'play': 14488000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/19', 'play': 8741000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/19",
+              "play": 8741000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/19', 'play': 8741000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/21', 'play': 19211000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/21",
+              "play": 19211000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/21', 'play': 19211000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/23', 'play': 6836000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/23",
+              "play": 6836000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/23', 'play': 6836000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/25', 'play': 17339000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/25",
+              "play": 17339000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/25', 'play': 17339000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/27', 'play': 16476000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/27",
+              "play": 16476000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/27', 'play': 16476000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/03/30', 'play': 23041000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/03/30",
+              "play": 23041000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/03/30', 'play': 23041000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/04/01', 'play': 33353000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/04/01",
+              "play": 33353000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/04/01', 'play': 33353000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/04/03', 'play': 4250000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/04/03",
+              "play": 4250000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/04/03', 'play': 4250000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/04/06', 'play': 21597000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/04/06",
+              "play": 21597000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/04/06', 'play': 21597000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/04/08', 'play': 13531000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/04/08",
+              "play": 13531000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/04/08', 'play': 13531000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/04/10', 'play': 3867000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/04/10",
+              "play": 3867000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/04/10', 'play': 3867000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          },
+          {
+            "field_name": "personal_chart_points",
+            "raw_value": "{'date': '26/04/13', 'play': 4963000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}",
+            "normalized_value": {
+              "date": "26/04/13",
+              "play": 4963000,
+              "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_personal_chart",
+            "evidence_text": "{'date': '26/04/13', 'play': 4963000, 'image_name': '0_2d8ce128558f0eb8cbb537d86e1f37e6.png'}"
+          }
+        ],
+        "latest15_star_chart": [
+          {
+            "field_name": "star_chart_min_play",
+            "raw_value": "2939000",
+            "normalized_value": 2939000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "2939000"
+          },
+          {
+            "field_name": "star_chart_max_play",
+            "raw_value": "44842000",
+            "normalized_value": 44842000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "44842000"
+          },
+          {
+            "field_name": "star_chart_avg_play",
+            "raw_value": "11994000",
+            "normalized_value": 11994000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "11994000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "6062000",
+            "normalized_value": 6062000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "6062000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "7462000",
+            "normalized_value": 7462000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "7462000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "6805000",
+            "normalized_value": 6805000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "6805000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "44842000",
+            "normalized_value": 44842000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "44842000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "17303000",
+            "normalized_value": 17303000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "17303000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "9578000",
+            "normalized_value": 9578000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "9578000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "6288000",
+            "normalized_value": 6288000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "6288000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "7936000",
+            "normalized_value": 7936000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "7936000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "8404000",
+            "normalized_value": 8404000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "8404000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "35229000",
+            "normalized_value": 35229000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "35229000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "2939000",
+            "normalized_value": 2939000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "2939000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "9819000",
+            "normalized_value": 9819000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "9819000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "5327000",
+            "normalized_value": 5327000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "5327000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "6492000",
+            "normalized_value": 6492000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "6492000"
+          },
+          {
+            "field_name": "sponsored_plays",
+            "raw_value": "5425000",
+            "normalized_value": 5425000,
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "5425000"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/09/04', 'play': 6062000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/09/04",
+              "play": 6062000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/09/04', 'play': 6062000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/09/08', 'play': 7462000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/09/08",
+              "play": 7462000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/09/08', 'play': 7462000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/09/10', 'play': 6805000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/09/10",
+              "play": 6805000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/09/10', 'play': 6805000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/09/16', 'play': 44842000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/09/16",
+              "play": 44842000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/09/16', 'play': 44842000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/09/22', 'play': 17303000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/09/22",
+              "play": 17303000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/09/22', 'play': 17303000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/10/16', 'play': 9578000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/10/16",
+              "play": 9578000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/10/16', 'play': 9578000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/10/20', 'play': 6288000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/10/20",
+              "play": 6288000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/10/20', 'play': 6288000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/10/31', 'play': 7936000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/10/31",
+              "play": 7936000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/10/31', 'play': 7936000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/11/11', 'play': 8404000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/11/11",
+              "play": 8404000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/11/11', 'play': 8404000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/11/20', 'play': 35229000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/11/20",
+              "play": 35229000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/11/20', 'play': 35229000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/12/19', 'play': 2939000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/12/19",
+              "play": 2939000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/12/19', 'play': 2939000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '25/12/21', 'play': 9819000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "25/12/21",
+              "play": 9819000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '25/12/21', 'play': 9819000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '26/01/05', 'play': 5327000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "26/01/05",
+              "play": 5327000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '26/01/05', 'play': 5327000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '26/01/26', 'play': 6492000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "26/01/26",
+              "play": 6492000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '26/01/26', 'play': 6492000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "star_chart_points",
+            "raw_value": "{'date': '26/02/11', 'play': 5425000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}",
+            "normalized_value": {
+              "date": "26/02/11",
+              "play": 5425000,
+              "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+            },
+            "confidence": 1.0,
+            "source": "vlm",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "{'date': '26/02/11', 'play': 5425000, 'image_name': '3_f0d6eb9ae909917ded15bb7db9b36d8a.png'}"
+          },
+          {
+            "field_name": "ad_bucketed_mode_play",
+            "raw_value": "6390000",
+            "normalized_value": 6390000,
+            "confidence": 1.0,
+            "source": "derived",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "6390000"
+          },
+          {
+            "field_name": "ad_median_play",
+            "raw_value": "7462000",
+            "normalized_value": 7462000,
+            "confidence": 1.0,
+            "source": "derived",
+            "screenshot_type": "latest15_star_chart",
+            "evidence_text": "7462000"
+          }
+        ]
+      },
+      "parsed_input": {
+        "creator_name": "夏叔厨房",
+        "natural_plays": [
+          9073000,
+          16526000,
+          14488000,
+          8741000,
+          19211000,
+          6836000,
+          17339000,
+          16476000,
+          23041000,
+          33353000,
+          4250000,
+          21597000,
+          13531000,
+          3867000,
+          4963000
+        ],
+        "sponsored_plays": [
+          6062000,
+          7462000,
+          6805000,
+          44842000,
+          17303000,
+          9578000,
+          6288000,
+          7936000,
+          8404000,
+          35229000,
+          2939000,
+          9819000,
+          5327000,
+          6492000,
+          5425000
+        ],
+        "personal_chart_points": [
+          {
+            "date": "26/03/12",
+            "play": 9073000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/14",
+            "play": 16526000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/17",
+            "play": 14488000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/19",
+            "play": 8741000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/21",
+            "play": 19211000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/23",
+            "play": 6836000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/25",
+            "play": 17339000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/27",
+            "play": 16476000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/03/30",
+            "play": 23041000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/04/01",
+            "play": 33353000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/04/03",
+            "play": 4250000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/04/06",
+            "play": 21597000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/04/08",
+            "play": 13531000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/04/10",
+            "play": 3867000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          },
+          {
+            "date": "26/04/13",
+            "play": 4963000,
+            "image_name": "0_2d8ce128558f0eb8cbb537d86e1f37e6.png"
+          }
+        ],
+        "star_chart_points": [
+          {
+            "date": "25/09/04",
+            "play": 6062000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/09/08",
+            "play": 7462000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/09/10",
+            "play": 6805000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/09/16",
+            "play": 44842000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/09/22",
+            "play": 17303000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/10/16",
+            "play": 9578000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/10/20",
+            "play": 6288000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/10/31",
+            "play": 7936000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/11/11",
+            "play": 8404000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/11/20",
+            "play": 35229000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/12/19",
+            "play": 2939000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "25/12/21",
+            "play": 9819000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "26/01/05",
+            "play": 5327000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "26/01/26",
+            "play": 6492000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          },
+          {
+            "date": "26/02/11",
+            "play": 5425000,
+            "image_name": "3_f0d6eb9ae909917ded15bb7db9b36d8a.png"
+          }
+        ],
+        "post_count_30d": 14,
+        "post_count_30d_source": "chart_dates",
+        "chart_date_count_30d_personal": 14,
+        "chart_date_count_30d_star": 0,
+        "chart_date_count_30d_total": 14,
+        "ad_mode_play": null,
+        "ad_median_play": 7462000,
+        "ad_bucketed_mode_play": 6390000,
+        "price_20s": 168000.0,
+        "price_20_60s": 188000.0,
+        "price_60s_plus": 259800.0,
+        "platform_expected_cpm": 16.3,
+        "platform_expected_play": 11514000,
+        "personal_chart_min_play": 3867000,
+        "personal_chart_max_play": 33353000,
+        "personal_chart_avg_play": 14219000,
+        "star_chart_min_play": 2939000,
+        "star_chart_max_play": 44842000,
+        "star_chart_avg_play": 11994000,
+        "sponsored_completion_rate": null,
+        "monthly_fan_growth_rate": 0.0099,
+        "monthly_connected_user_fan_ratio": null,
+        "monthly_deep_user_fan_ratio": null,
+        "creator_type": null,
+        "cooperate_brands": []
+      },
+      "parser_notes": []
+    },
+    "assessment": {
+      "primary_pool": {
+        "center": 4250000,
+        "low": 3400000,
+        "high": 5100000,
+        "raw_center": 4250000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          3867000,
+          4250000,
+          4963000
+        ],
+        "explanation": "最低稳定簇作为初级流量池"
+      },
+      "secondary_pool": {
+        "center": 8741000,
+        "low": 6992800,
+        "high": 10489200,
+        "raw_center": 8741000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          6836000,
+          8741000,
+          9073000
+        ],
+        "explanation": "符合初级池倍数范围的稳定簇作为次级流量池"
+      },
+      "commercial_primary_pool": {
+        "center": 6492000,
+        "low": 5193600,
+        "high": 7790400,
+        "raw_center": 6492000,
+        "adjustment_factor": 1.0,
+        "cluster_values": [
+          5327000,
+          5425000,
+          6062000,
+          6288000,
+          6492000,
+          6805000,
+          7462000,
+          7936000,
+          8404000
+        ],
+        "explanation": "最低稳定簇作为初级流量池"
+      },
+      "commercial_secondary_pool": null,
+      "commercial_cpm_play_basis": 6492000,
+      "natural_cpm_play_basis": 4250000,
+      "commercial_pool_center_for_cpm": 6492000,
+      "natural_pool_center_for_cpm": 4250000,
+      "commercial_level": "B",
+      "ad_repr_play": 7033200,
+      "predicted_ad_play": 6492000,
+      "weighted_predicted_ad_play": 8439600,
+      "cpm_by_tier": {
+        "20s": {
+          "price": 168000.0,
+          "predicted_cpm": 25.88,
+          "natural_cpm": 39.53,
+          "reason": null,
+          "commercial_cpm_play_basis_source": "star_chart_primary_pool",
+          "natural_cpm_play_basis_source": "natural_primary_pool"
+        },
+        "20-60s": {
+          "price": 188000.0,
+          "predicted_cpm": 28.96,
+          "natural_cpm": 44.24,
+          "reason": null,
+          "commercial_cpm_play_basis_source": "star_chart_primary_pool",
+          "natural_cpm_play_basis_source": "natural_primary_pool"
+        },
+        "60s+": {
+          "price": 259800.0,
+          "predicted_cpm": 40.02,
+          "natural_cpm": 61.13,
+          "reason": null,
+          "commercial_cpm_play_basis_source": "star_chart_primary_pool",
+          "natural_cpm_play_basis_source": "natural_primary_pool"
+        }
+      },
+      "confidence_score": 100.0,
+      "review_flag": false,
+      "review_reasons": [],
+      "explanations": [
+        "最低稳定簇作为初级流量池",
+        "符合初级池倍数范围的稳定簇作为次级流量池",
+        "商单代表值采用中位数/分桶众数组合，得到 7033200。",
+        "预估商单播放量为 6492000。",
+        "最低稳定簇作为星图商单流量池",
+        "商单能力评估：商单位于次级池低位，系数=1.0",
+        "自然流量趋势：stable，系数=1.04",
+        "星图流量趋势：stable，系数=0.97",
+        "全部流量趋势：rising，系数=1.30",
+        "互动修正系数暂未启用，当前固定为 1.0。",
+        "近30天发文数由个人视频和星图视频图表日期推导。"
+      ],
+      "reference": {
+        "platform_expected_cpm": 16.3,
+        "platform_expected_play": 11514000
+      },
+      "debug": {
+        "valid_natural_plays": [
+          3867000,
+          4250000,
+          4963000,
+          6836000,
+          8741000,
+          9073000,
+          13531000,
+          14488000,
+          16476000,
+          16526000,
+          17339000,
+          19211000,
+          21597000,
+          23041000,
+          33353000
+        ],
+        "ordered_natural_plays": [
+          9073000,
+          16526000,
+          14488000,
+          8741000,
+          19211000,
+          6836000,
+          17339000,
+          16476000,
+          23041000,
+          33353000,
+          4250000,
+          21597000,
+          13531000,
+          3867000,
+          4963000
+        ],
+        "ordered_sponsored_plays": [
+          6062000,
+          7462000,
+          6805000,
+          44842000,
+          17303000,
+          9578000,
+          6288000,
+          7936000,
+          8404000,
+          35229000,
+          2939000,
+          9819000,
+          5327000,
+          6492000,
+          5425000
+        ],
+        "ordered_overall_plays": [
+          6062000,
+          7462000,
+          6805000,
+          44842000,
+          17303000,
+          9578000,
+          6288000,
+          7936000,
+          8404000,
+          35229000,
+          2939000,
+          9819000,
+          5327000,
+          6492000,
+          5425000,
+          9073000,
+          16526000,
+          14488000,
+          8741000,
+          19211000,
+          6836000,
+          17339000,
+          16476000,
+          23041000,
+          33353000,
+          4250000,
+          21597000,
+          13531000,
+          3867000,
+          4963000
+        ],
+        "valid_sponsored_plays": [
+          2939000,
+          5327000,
+          5425000,
+          6062000,
+          6288000,
+          6492000,
+          6805000,
+          7462000,
+          7936000,
+          8404000,
+          9578000,
+          9819000,
+          17303000,
+          35229000,
+          44842000
+        ],
+        "activity_discount_factor": 1.0,
+        "post_count_30d": 14,
+        "post_count_30d_source": "chart_dates",
+        "chart_date_count_30d_personal": 14,
+        "chart_date_count_30d_star": 0,
+        "chart_date_count_30d_total": 14,
+        "raw_primary_pool": {
+          "center": 4250000,
+          "low": 3400000,
+          "high": 5100000,
+          "raw_center": 4250000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            3867000,
+            4250000,
+            4963000
+          ],
+          "explanation": "最低稳定簇作为初级流量池"
+        },
+        "raw_secondary_pool": {
+          "center": 8741000,
+          "low": 6992800,
+          "high": 10489200,
+          "raw_center": 8741000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            6836000,
+            8741000,
+            9073000
+          ],
+          "explanation": "符合初级池倍数范围的稳定簇作为次级流量池"
+        },
+        "raw_commercial_primary_pool": {
+          "center": 6492000,
+          "low": 5193600,
+          "high": 7790400,
+          "raw_center": 6492000,
+          "adjustment_factor": 1.0,
+          "cluster_values": [
+            5327000,
+            5425000,
+            6062000,
+            6288000,
+            6492000,
+            6805000,
+            7462000,
+            7936000,
+            8404000
+          ],
+          "explanation": "最低稳定簇作为初级流量池"
+        },
+        "raw_commercial_secondary_pool": null,
+        "commercial_cpm_play_basis_source": "star_chart_primary_pool",
+        "config": {
+          "min_valid_natural_plays": 8,
+          "ad_repr_median_weight": 0.6,
+          "ad_stat_divergence_ratio": 2.5,
+          "price_min": 1.0,
+          "price_max": 10000000.0,
+          "post_count_discount_factors": {
+            "0": 0.0,
+            "1": 3.0,
+            "2": 2.6,
+            "3": 2.4,
+            "4": 2.2,
+            "5": 2.0,
+            "6": 1.0
+          },
+          "bucketed_mode": {
+            "enabled": true,
+            "bucket_ratio": 0.25,
+            "min_bucket_width": 10000,
+            "prefer_lower_bucket_on_tie": true
+          },
+          "clustering": {
+            "adjacent_ratio_threshold": 1.35,
+            "min_cluster_size": 2,
+            "primary_range_ratio": 0.2,
+            "secondary_min_multiple": 2.0,
+            "secondary_max_multiple": 4.0,
+            "fallback_secondary_multiple": 2.5
+          },
+          "confidence": {
+            "initial_score": 100.0,
+            "missing_required_field_penalty": 10.0,
+            "low_natural_count_penalty": 25.0,
+            "no_secondary_pool_penalty": 12.0,
+            "ad_stat_divergence_penalty": 10.0,
+            "price_issue_penalty": 8.0,
+            "low_post_count_penalty": 8.0,
+            "very_low_post_count_penalty": 15.0,
+            "review_threshold": 70.0
+          },
+          "weighted_prediction": {
+            "commercial_ability_high_threshold": 0.8,
+            "commercial_ability_good_threshold": 0.6,
+            "commercial_ability_normal_threshold": 0.4,
+            "commercial_ability_low_threshold": 0.2,
+            "trend_min_coefficient": 0.7,
+            "trend_max_coefficient": 1.3,
+            "commercial_coefficient_min": 0.6,
+            "commercial_coefficient_max": 1.2,
+            "engagement_coefficient": 1.0
+          }
+        }
+      },
+      "natural_trend_metrics": {
+        "trend_coefficient": 1.0355811706239646,
+        "trend_direction": "stable",
+        "first_half_median": 14488000,
+        "second_half_median": 15003500
+      },
+      "commercial_trend_metrics": {
+        "trend_coefficient": 0.9667649423746985,
+        "trend_direction": "stable",
+        "first_half_median": 7462000,
+        "second_half_median": 7214000
+      },
+      "overall_trend_metrics": {
+        "trend_coefficient": 1.3,
+        "trend_direction": "rising",
+        "first_half_median": 7462000,
+        "second_half_median": 14488000
+      },
+      "trend_metrics": {
+        "trend_coefficient": 1.0355811706239646,
+        "trend_direction": "stable",
+        "first_half_median": 14488000,
+        "second_half_median": 15003500
+      },
+      "commercial_ability": {
+        "ability_score": 0.6,
+        "ability_level": "above_normal",
+        "coefficient": 1.0,
+        "explanation": "商单位于次级池低位",
+        "historical_commercial_position": "商单位于次级池低位"
+      },
+      "base_predicted_play": 6492000,
+      "final_prediction_factors": {
+        "commercial_ability": 1.0,
+        "overall_trend": 1.3,
+        "engagement": 1.0
+      }
+    }
+  }
+}

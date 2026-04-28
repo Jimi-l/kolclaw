@@ -1,0 +1,108 @@
+{
+  "weflow": {
+    "version": "1.0.3",
+    "exportedAt": 1776930966,
+    "generator": "extract_nested_forwarded_chats"
+  },
+  "session": {
+    "wxid": "record_0093",
+    "nickname": "Monkey丶",
+    "remark": "",
+    "displayName": "小被罩儿 & Monkey丶",
+    "participants": [
+      "小被罩儿",
+      "Monkey丶"
+    ],
+    "pairKey": "monkey丶__小被罩儿",
+    "type": "friend",
+    "lastTimestamp": 1776909835,
+    "messageCount": 4,
+    "avatar": "",
+    "sourceFile": "私聊_文件传输助手.json",
+    "sourceTopMessageIndex": 0,
+    "recordOrder": 93,
+    "lineRange": [
+      374,
+      395
+    ],
+    "startKind": "title_start"
+  },
+  "messages": [
+    {
+      "localId": 1,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "Monkey\n【合作档期】\n4.15\n【合作需求】\n按以往的搞笑视频内容，结合【逆水寒】游戏内创作抽象雷霆的ai剧情发展走向\n【以下请确认】\n1、抖音60s+星图视频报价及返点：\n2、抖音60s+水下视频报价（是否含税6）：\n3、是否有其他免费赠送分发平台，需要加品牌tag（如不能希望给个全平台分发优惠报价）：\n4、是否可以免费分发网易内部平台，包含大神、云音乐笔记（需要永久保留，如不可，可能暂时就不考虑合作）：\n5、是否可授权3个月原生投流，需要抖音合作码：（授权客户投流及授权客户官方账号发布）：\n6、视频是否可以免费授权客户二创：\n7、10天内可以保多少播放量（客户要求保）：\n8、发布档期4.15是否可以：\n9、档期附近是否有待发布或刚发布的逆水寒商单:\n10、发布后48h是否可以不更新任何视频：\n11、抖音作品需保留1年是否可以：\n12、如有合作须知请提前同步~（例如脚本视频修改次数限制等）\n13、制作周期：",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0093_0001",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 374,
+      "sourceLineEnd": 392,
+      "recordOrder": 93,
+      "mergedOrder": null
+    },
+    {
+      "localId": 2,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "这个档期还有吗老师",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0093_0002",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 393,
+      "sourceLineEnd": 393,
+      "recordOrder": 93,
+      "mergedOrder": null
+    },
+    {
+      "localId": 3,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "你好，是什么平台的",
+      "isSend": 0,
+      "senderUsername": "participant_monkey丶",
+      "senderDisplayName": "Monkey丶",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0093_0003",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 394,
+      "sourceLineEnd": 394,
+      "recordOrder": 93,
+      "mergedOrder": null
+    },
+    {
+      "localId": 4,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "抖音",
+      "isSend": 1,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0093_0004",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 395,
+      "sourceLineEnd": 395,
+      "recordOrder": 93,
+      "mergedOrder": null
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+Project 1: 整体工作流prompt（Martin提供样本）
+Project 2: 数据筛选prompt，cpm预估算法
+Project 3: 巡号逻辑
+Project 4: 巡号算法prompt更新
+Project 5: 巡号中的账号商业能力分析、爆款内容分析prompt
+Project 6: 标签知识库
+Project 7: 表格栏扩展系统
+Project 8: 数据填写虾
+Project 9: 数据算法自动表格输出

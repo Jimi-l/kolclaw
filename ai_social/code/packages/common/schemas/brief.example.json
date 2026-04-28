@@ -1,0 +1,21 @@
+{
+  "campaign_id": "brief-fashion-shanghai-001",
+  "campaign_name": "Shanghai Spring Offline Show Push",
+  "platform": "douyin",
+  "budget_total": 132000,
+  "creator_tier": "mid-tier",
+  "creator_types": ["fashion", "beauty", "stylish"],
+  "city": "shanghai",
+  "event_date": "2026-05-20",
+  "post_dates": ["2026-05-20", "2026-05-21", "2026-05-23"],
+  "content_tags": ["outfit", "show", "transition", "runway", "event vlog"],
+  "style_tags": ["stylish", "premium", "city chic"],
+  "constraints": {
+    "min_fans_count": 80000,
+    "min_female_ratio": 0.55,
+    "max_candidate_price": 42240,
+    "required_creator_types": ["fashion", "beauty", "stylish"],
+    "notes": ["Example brief for the KOLClaw scaffold."]
+  },
+  "keywords": ["shanghai", "offline show", "outfit", "transition", "runway", "brand event"]
+}

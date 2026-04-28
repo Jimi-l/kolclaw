@@ -1,0 +1,74 @@
+[
+  {
+    "localId": 1,
+    "type": "文本消息",
+    "content": "宝 发票好了嘛",
+    "senderDisplayName": "嘉"
+  },
+  {
+    "localId": 2,
+    "type": "文本消息",
+    "content": "[图片]",
+    "senderDisplayName": "陈欣"
+  },
+  {
+    "localId": 3,
+    "type": "文本消息",
+    "content": "@嘉  好啦！",
+    "senderDisplayName": "陈欣"
+  },
+  {
+    "localId": 4,
+    "type": "文本消息",
+    "content": "好",
+    "senderDisplayName": "嘉"
+  },
+  {
+    "localId": 5,
+    "type": "文本消息",
+    "content": "[图片]",
+    "senderDisplayName": "陈欣"
+  },
+  {
+    "localId": 6,
+    "type": "文本消息",
+    "content": "@嘉  好啦！",
+    "senderDisplayName": "陈欣"
+  },
+  {
+    "localId": 7,
+    "type": "文本消息",
+    "content": "好",
+    "senderDisplayName": "嘉"
+  },
+  {
+    "localId": 8,
+    "type": "文本消息",
+    "content": "宝 咱们账户信息是哪一个呀～",
+    "senderDisplayName": "嘉"
+  },
+  {
+    "localId": 9,
+    "type": "文本消息",
+    "content": "@陈欣",
+    "senderDisplayName": "嘉"
+  },
+  {
+    "localId": 10,
+    "type": "文本消息",
+    "content": "来啦",
+    "senderDisplayName": "陈欣"
+  },
+  {
+    "localId": 11,
+    "type": "文本消息",
+    "content": "公司名称：北京微梦传媒股份有限公司\n纳税人识别号：911101055751783521\n地址：北京市大兴区经济开发区科苑路18号3幢一层A723室\n电   话：010-52495102\n开户行：北京银行股份有限公司互联网金融中心支行\n账   号：20000031841700010612542\n行   号：313100002003\n开户行地址：北京市海淀区丹棱街1号互联网金融中心1层",
+    "senderDisplayName": "陈欣"
+  },
+  {
+    "localId": 12,
+    "type": "文本消息",
+    "content": "[图片]",
+    "senderDisplayName": "嘉"
+  }
+]

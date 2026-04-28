@@ -1,0 +1,10 @@
+{
+  "created_at": "2026-04-17T10:03:14",
+  "status": "error",
+  "mode": "vlm_only",
+  "upload_filenames": [
+    "x.png"
+  ],
+  "error_type": "HTTPException",
+  "error": "503: VLM is not configured: set XINGTU_CPM_VLM_ENABLED=true and XINGTU_CPM_VLM_API_KEY."
+}

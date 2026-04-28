@@ -1,0 +1,108 @@
+{
+  "weflow": {
+    "version": "1.0.3",
+    "exportedAt": 1776930966,
+    "generator": "extract_nested_forwarded_chats"
+  },
+  "session": {
+    "wxid": "record_0087",
+    "nickname": "小被罩儿",
+    "remark": "",
+    "displayName": "傲慢的演奏家（没回消息多喊几次） & 小被罩儿",
+    "participants": [
+      "傲慢的演奏家（没回消息多喊几次）",
+      "小被罩儿"
+    ],
+    "pairKey": "傲慢的演奏家（没回消息多喊几次）__小被罩儿",
+    "type": "friend",
+    "lastTimestamp": 1776909835,
+    "messageCount": 4,
+    "avatar": "",
+    "sourceFile": "私聊_文件传输助手.json",
+    "sourceTopMessageIndex": 0,
+    "recordOrder": 87,
+    "lineRange": [
+      135,
+      143
+    ],
+    "startKind": "title_start"
+  },
+  "messages": [
+    {
+      "localId": 1,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "联系人姓名：邓佳豪\n电话：15972120131\n联系地址：武汉市江汉区黄陂街18号武汉长江航运中心5、6、9栋5号楼单元27层1号\n可回复确认信息的邮箱：798339371@qq.com\n公司开票信息（开户行名称及账号，专票/普票，发票类型）：武汉橙子软糖传媒有限公司 普票\n营业执照（图片形式）：",
+      "isSend": 1,
+      "senderUsername": "participant_傲慢的演奏家_没回消息多喊几次",
+      "senderDisplayName": "傲慢的演奏家（没回消息多喊几次）",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0087_0001",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 135,
+      "sourceLineEnd": 140,
+      "recordOrder": 87,
+      "mergedOrder": null
+    },
+    {
+      "localId": 2,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "[消息]",
+      "isSend": 1,
+      "senderUsername": "participant_傲慢的演奏家_没回消息多喊几次",
+      "senderDisplayName": "傲慢的演奏家（没回消息多喊几次）",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0087_0002",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 141,
+      "sourceLineEnd": 141,
+      "recordOrder": 87,
+      "mergedOrder": null
+    },
+    {
+      "localId": 3,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "好的收到晚些拉群",
+      "isSend": 0,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0087_0003",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 142,
+      "sourceLineEnd": 142,
+      "recordOrder": 87,
+      "mergedOrder": null
+    },
+    {
+      "localId": 4,
+      "createTime": 1776909835,
+      "formattedTime": "2026-04-23 10:03:55",
+      "type": "文本消息",
+      "localType": 1,
+      "content": "这个也要老师；开户行名称及账号",
+      "isSend": 0,
+      "senderUsername": "participant_小被罩儿",
+      "senderDisplayName": "小被罩儿",
+      "source": "私聊_文件传输助手.json",
+      "platformMessageId": "record_0087_0004",
+      "sourceFile": "私聊_文件传输助手.json",
+      "sourceTopMessageIndex": 0,
+      "sourceLineStart": 143,
+      "sourceLineEnd": 143,
+      "recordOrder": 87,
+      "mergedOrder": null
+    }
+  ]
+}

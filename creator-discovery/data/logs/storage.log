@@ -1,0 +1,10 @@
+2026-04-07 14:00:21,718 | INFO | storage | Upsert creator record (created): 白昼小熊
+2026-04-07 14:00:21,725 | INFO | storage | Saved checkpoint: douyin_discovery:last_run
+2026-04-07 14:00:21,734 | INFO | storage | Upsert creator record (created): 通勤阿琳
+2026-04-07 14:00:21,741 | INFO | storage | Saved checkpoint: douyin_discovery:last_run
+2026-04-07 14:00:21,748 | INFO | storage | Saved workflow summary: douyin_discovery:2026-04-07T14:00:21
+2026-04-07 14:00:26,678 | INFO | storage | Upsert creator record (updated): 白昼小熊
+2026-04-07 14:00:26,686 | INFO | storage | Saved checkpoint: xingtu_enrichment:last_run
+2026-04-07 14:00:26,694 | INFO | storage | Upsert creator record (updated): 通勤阿琳
+2026-04-07 14:00:26,701 | INFO | storage | Saved checkpoint: xingtu_enrichment:last_run
+2026-04-07 14:00:26,705 | INFO | storage | Saved workflow summary: xingtu_enrichment:2026-04-07T14:00:26
