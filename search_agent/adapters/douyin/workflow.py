@@ -553,6 +553,14 @@ class CreatorDiscoveryWorkflow:
             self._log_session_state(browser, session_path, mode="bootstrap-login")
             adapter = DouyinPageAdapter(browser.page, self.artifacts, self.logger)
             adapter.open_homepage()
+
+            self._wait_until_login_ready_without_enter(
+                adapter=adapter,
+                context="bootstrap-login-gate",
+                max_wait_seconds=300,
+                check_interval_seconds=3,
+            )
+
             snapshot = self._run_with_interactive_pause(
                 adapter=adapter,
                 operation=lambda: adapter.ensure_normal_feed(bootstrap_login=True),
@@ -613,6 +621,14 @@ class CreatorDiscoveryWorkflow:
             self._log_session_state(browser, session_path, mode="creator-discovery")
             adapter = DouyinPageAdapter(browser.page, self.artifacts, self.logger)
             adapter.open_homepage()
+
+            self._wait_until_login_ready_without_enter(
+                adapter=adapter,
+                context="discovery-login-gate",
+                max_wait_seconds=300,
+                check_interval_seconds=3,
+            )
+
             bootstrap_state = self._run_with_interactive_pause(
                 adapter=adapter,
                 operation=lambda: adapter.ensure_normal_feed(bootstrap_login=False),
@@ -1314,6 +1330,133 @@ class CreatorDiscoveryWorkflow:
             context=f"content-snapshot:{debug_label}",
             deadline=deadline,
         )
+    def _pause_if_login_or_verification_required(
+    self,
+    adapter: DouyinPageAdapter,
+    context: str,
+    ) -> None:
+        """打开抖音后先检查登录状态。
+
+        如果当前页面是：
+        - 未登录
+        - 登录弹窗
+        - 扫码登录
+        - 手机号登录
+        - 验证码 / 滑块 / 人机验证
+
+        就停在当前页面，不刷新、不跳转、不继续抓取。
+        用户手动完成登录后，在终端按 Enter，程序再继续。
+        """
+        login_states = {
+            "unauthenticated",
+            "login_modal",
+            "captcha_blocked",
+        }
+
+        while True:
+            snapshot = adapter.classify_page_state(
+                debug_label=f"{context}_login_gate",
+                capture=True,
+            )
+
+            if snapshot.state not in login_states:
+                return
+
+            exc = adapter._snapshot_to_blocking_error(
+                snapshot,
+                page_name=context,
+            )
+
+            self.logger.warning(
+                "douyin login gate paused; waiting for manual login or verification",
+                extra={
+                    "context": context,
+                    "page_state": snapshot.state,
+                    "page_url": snapshot.page_url,
+                    "page_title": snapshot.page_title,
+                    "reason": snapshot.reason,
+                    "detected_phrase": snapshot.detected_phrase,
+                    "screenshot_path": snapshot.screenshot_path,
+                    "browser_will_remain_open": True,
+                },
+            )
+
+            if not self._handle_resumable_pause(
+                adapter=adapter,
+                exc=exc,
+                context=context,
+                deadline=None,
+            ):
+                raise exc
+    def _wait_until_login_ready_without_enter(
+    self,
+    adapter: DouyinPageAdapter,
+    context: str,
+    max_wait_seconds: int = 300,
+    check_interval_seconds: int = 3,
+    ) -> None:
+        """自动等待抖音登录/验证完成，不需要用户回终端按 Enter。
+
+        逻辑：
+        1. 如果当前是未登录/登录弹窗/验证码，就停在当前页面。
+        2. 每隔几秒自动检查一次页面状态。
+        3. 一旦检测到已经不是登录/验证码状态，就自动进入推荐流。
+        """
+        login_states = {
+            "unauthenticated",
+            "login_modal",
+            "captcha_blocked",
+        }
+
+        start_wait = time.monotonic()
+
+        while True:
+            snapshot = adapter.classify_page_state(
+                debug_label=f"{context}_auto_login_gate",
+                capture=True,
+            )
+
+            self.logger.info(
+                "douyin auto login gate check",
+                extra={
+                    "context": context,
+                    "page_state": snapshot.state,
+                    "page_url": snapshot.page_url,
+                    "page_title": snapshot.page_title,
+                    "reason": snapshot.reason,
+                    "detected_phrase": snapshot.detected_phrase,
+                },
+            )
+
+            # 已经不在登录/验证码状态了
+            if snapshot.state not in login_states:
+                current_url = snapshot.page_url or ""
+
+                # 如果登录后停在 /jingxuan，就主动进推荐流
+                if "/jingxuan" in current_url:
+                    adapter.enter_recommend_feed_from_jingxuan()
+
+                return
+
+            # 超时保护，避免永远卡住
+            elapsed = time.monotonic() - start_wait
+            if elapsed >= max_wait_seconds:
+                raise SearchAgentError(
+                    f"Douyin login/verification was not completed within {max_wait_seconds} seconds: {context}"
+                )
+
+            print(
+                f"\nDouyin 正在等待你完成登录/验证码，不需要按 Enter。"
+                f"\n当前状态: {snapshot.state}"
+                f"\n原因: {snapshot.reason}"
+                f"\n程序会在 {check_interval_seconds} 秒后自动重新检查...\n",
+                flush=True,
+            )
+
+            try:
+                adapter.page.wait_for_timeout(check_interval_seconds * 1000)
+            except Exception:
+                time.sleep(check_interval_seconds)      
 
     def _run_with_interactive_pause(
         self,
@@ -1329,75 +1472,24 @@ class CreatorDiscoveryWorkflow:
                 result = operation()
                 if paused_once:
                     self.logger.info(
-                        "douyin retry succeeded after Enter",
+                        "douyin retry succeeded after login/verification recovery",  
                         extra={"context": context, "browser_will_remain_open": True},
                     )
                 return result
             except BlockingStateError as exc:
-                if getattr(exc, "page_state", None) == "captcha_blocked":
-                    self.logger.warning(
-                        "captcha detected; try one safe refresh back to recommend feed",
-                        extra={
-                            "context": context,
-                            "page_state": exc.page_state,
-                            "message": exc.message,
-                        },
+                if getattr(exc, "page_state", None) in {
+                    "unauthenticated",
+                    "login_modal",
+                    "captcha_blocked",
+                }:
+                    self._wait_until_login_ready_without_enter(
+                        adapter=adapter,
+                        context=context,
+                        max_wait_seconds=300,
+                        check_interval_seconds=3,
                     )
-
-                    try:
-                        adapter.page.keyboard.press("Escape")
-                        adapter.page.wait_for_timeout(500)
-
-                        adapter.page.goto(
-                            "https://www.douyin.com/?recommend=1&from_nav=1",
-                            wait_until="domcontentloaded",
-                            timeout=20000,
-                        )
-                        adapter.page.wait_for_timeout(3000)
-
-                        refreshed_state = adapter.classify_page_state(
-                            debug_label=f"{context}_captcha_refresh_check",
-                            capture=True,
-                        )
-
-                        if refreshed_state.state in {
-                            "recommend_feed_shell",
-                            "recommend_feed_interactable",
-                            "recommended_feed_ready",
-                        }:
-                            self.logger.info(
-                                "captcha disappeared after one refresh; continue workflow",
-                                extra={
-                                    "context": context,
-                                    "page_state": refreshed_state.state,
-                                    "page_url": refreshed_state.page_url,
-                                },
-                            )
-                            paused_once = True
-                            continue
-
-                        self.logger.warning(
-                            "captcha still present after refresh; stop run gracefully",
-                            extra={
-                                "context": context,
-                                "page_state": refreshed_state.state,
-                                "page_url": refreshed_state.page_url,
-                                "page_title": refreshed_state.page_title,
-                            },
-                        )
-
-                    except Exception as refresh_exc:
-                        self.logger.warning(
-                            "captcha refresh attempt failed; stop run gracefully",
-                            extra={
-                                "context": context,
-                                "error": str(refresh_exc),
-                            },
-                        )
-
-                    raise SearchAgentError(
-                        f"Captcha detected and still present after one refresh: {context}"
-                    )
+                    paused_once = True
+                    continue
 
                 if not self._handle_resumable_pause(adapter, exc, context=context, deadline=deadline):
                     raise
