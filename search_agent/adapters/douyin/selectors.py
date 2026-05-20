@@ -210,10 +210,22 @@ TOTAL_LIKED_COUNT_SELECTORS = [
     "span:has-text('点赞')",
 ]
 
+PROFILE_WORKS_TAB_SELECTORS = [
+    "text=TA的作品",
+    "div:has-text('TA的作品')",
+    "[role='tab']:has-text('TA的作品')",
+    ".semi-tabs-tab:has-text('TA的作品')",
+    "button:has-text('TA的作品')",
+]
+
 PROFILE_VIDEO_CARD_SELECTORS = [
     "a[href*='/video/']",
+    "a[href*='/note/']",
     "li:has(a[href*='/video/'])",
+    "li:has(a[href*='/note/'])",
     "div[data-e2e*='user-post-item']",
+    "div:has(a[href*='/video/'])",
+    "div:has(a[href*='/note/'])",
 ]
 
 PROFILE_VIDEO_TITLE_SELECTORS = [

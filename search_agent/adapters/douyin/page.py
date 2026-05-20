@@ -31,6 +31,7 @@ class FeedCandidateSnapshot:
     share_count_raw: str | None = None
     ai_generated_flag: bool | None = None
     is_live: bool = False
+    is_commerce: bool = False #
     is_ad: bool = False
     caption_text: str | None = None
     raw_text: str | None = None
@@ -110,6 +111,8 @@ class ProfileVideoCard:
     url: str | None
     title: str | None
     like_raw: str | None
+    publish_time_raw: str | None = None
+    publish_timestamp: int | None = None
     is_pinned: bool = False
 
 
@@ -127,7 +130,108 @@ class ProfileAnalysisSnapshot:
     speaking_style: str | None = None
     video_duration_pattern: str | None = None
     notes: list[str] = field(default_factory=list)
+    recent_video_publish_times: list[str | None] = field(default_factory=list)
+    recent_video_urls: list[str | None] = field(default_factory=list)
 
+def _compact_profile_video_cards(
+    cards: list[ProfileVideoCard],
+    limit: int = 15,
+    total_liked_count_raw: str | None = None,
+) -> list[ProfileVideoCard]:
+    """Clean profile video cards before saving to CSV.
+
+    作用：
+    1. 去掉空点赞量
+    2. 去掉主页头部误抓的数据，比如粉丝/总获赞/关注
+    3. 去掉 DOM 嵌套造成的连续重复
+    4. 尽量保留真实不同作品的相同点赞数
+    """
+    cleaned: list[ProfileVideoCard] = []
+    seen_urls: set[str] = set()
+    previous_no_url_key: str | None = None
+
+    def normalize_metric(value: str | None) -> str:
+        if not value:
+            return ""
+        return (
+            str(value)
+            .replace(" ", "")
+            .replace("\n", "")
+            .replace("\t", "")
+            .replace("W", "w")
+            .replace("K", "k")
+            .strip()
+        )
+
+    def normalize_title(value: str | None) -> str:
+        if not value:
+            return ""
+        text = str(value).replace("\n", " ").replace("\t", " ").strip()
+        text = text.replace("播放中", "").strip()
+        text = re.sub(r"\s+", " ", text)
+        return text[:80]
+
+    total_liked_key = normalize_metric(total_liked_count_raw)
+
+    for card in cards or []:
+        if card is None:
+            continue
+
+        like_raw = normalize_metric(card.like_raw)
+        title = normalize_title(card.title)
+        url = (card.url or "").strip()
+
+        # 1. 没有点赞量的不要，避免 recent_03_like_count 为空
+        if not like_raw:
+            continue
+
+        # 2. 点赞量必须像数字：551、2.1万、10万、1.3亿
+        if not re.fullmatch(r"\d+(?:\.\d+)?(?:万|亿|w|W|k|K)?", like_raw):
+            continue
+
+        combined_text = f"{title} {like_raw}"
+
+        # 3. 过滤主页头部信息
+        if (
+            "粉丝" in combined_text
+            and "获赞" in combined_text
+            and "关注" in combined_text
+        ):
+            continue
+
+        if "TA的作品" in combined_text:
+            continue
+
+        if "详情" in combined_text and "评论" in combined_text:
+            continue
+
+        # 4. 如果没有作品 url / title，而且点赞量刚好等于主页总获赞，
+        # 大概率是把主页头部“总获赞”误当成作品点赞了。
+        if not url and not title and total_liked_key and like_raw == total_liked_key:
+            continue
+
+        # 5. 有 URL 时按 URL 去重
+        if url:
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            previous_no_url_key = None
+        else:
+            # 6. 没有 URL 时，只去掉“连续重复”的同一个 DOM 嵌套结果
+            # 不做全局 like_raw 去重，避免误删真实不同作品刚好点赞数一样的情况。
+            no_url_key = f"{like_raw}|{title}"
+
+            if no_url_key == previous_no_url_key:
+                continue
+
+            previous_no_url_key = no_url_key
+
+        cleaned.append(card)
+
+        if len(cleaned) >= limit:
+            break
+
+    return cleaned
 
 class DouyinPageAdapter:
     LOGIN_BLOCK_REASONS = {
@@ -861,81 +965,95 @@ class DouyinPageAdapter:
     ) -> FeedCandidateSnapshot:
         snapshot = replace(candidate)
         network_match = self._match_recent_aweme_item(candidate)
-        if network_match and network_match.get("video_url"):
-            snapshot.video_url = network_match["video_url"]
-            snapshot.video_url_capture_source = "network"
-        elif snapshot.video_url:
-            snapshot.video_url_capture_source = "dom"
-        else:
-            snapshot.video_url_capture_source = "none"
 
-        description_raw = _clean_video_description_text(snapshot.raw_text)
-        network_description = _clean_video_description_text(network_match.get("description")) if network_match else None
-        network_expanded_description = _clean_video_description_text(
-            network_match.get("description"),
-            limit=960,
-        ) if network_match else None
-        snapshot.video_title_text = _merge_description_text(
-            _extract_video_title_text(snapshot.raw_text),
-            _extract_video_title_text(network_match.get("description")) if network_match else None,
-        )
-        snapshot.video_description_raw = _merge_description_text(description_raw, network_description)
-        snapshot.expanded_description_text = _merge_description_text(
-            _clean_video_description_text(snapshot.raw_text, limit=960),
-            network_expanded_description,
-        )
-        if not _is_meaningfully_distinct(snapshot.expanded_description_text, snapshot.video_description_raw):
-            snapshot.expanded_description_text = None
-        raw_metadata_source = " ".join(
-            part
-            for part in (
-                snapshot.raw_text,
-                network_match.get("description") if network_match else None,
+        # 直播和商品卡不点分享按钮，也不提取视频链接
+        if snapshot.is_live:
+            snapshot.video_url = None
+            snapshot.video_url_capture_source = "live_skipped"
+
+        elif _looks_like_commerce_feed_item(snapshot.raw_text):
+            snapshot.is_commerce = True
+            snapshot.video_url = None
+            snapshot.video_url_capture_source = "commerce_skipped"
+
+        else:
+            # 普通视频只接受右下角「分享 -> 复制链接」拿到的永久链接
+            share_video_url = self._copy_current_video_share_link(debug_label=debug_label)
+
+            if share_video_url:
+                snapshot.video_url = share_video_url
+                snapshot.video_url_capture_source = "share_copy"
+            else:
+                snapshot.video_url = None
+                snapshot.video_url_capture_source = "none"
+            # 这里处理 video_url，只信复制链接
+            description_raw = _clean_video_description_text(snapshot.raw_text)
+            network_description = _clean_video_description_text(network_match.get("description")) if network_match else None
+            network_expanded_description = _clean_video_description_text(
+                network_match.get("description"),
+                limit=960,
+            ) if network_match else None
+            snapshot.video_title_text = _merge_description_text(
+                _extract_video_title_text(snapshot.raw_text),
+                _extract_video_title_text(network_match.get("description")) if network_match else None,
             )
-            if part
-        )
-        snapshot.chapter_texts = _extract_chapter_texts(raw_metadata_source)
-        snapshot.related_search_terms = _extract_related_search_terms(raw_metadata_source)
-        snapshot.author_statement_texts = _extract_author_statement_texts(raw_metadata_source)
-        snapshot.visible_subtitle_segments = self._collect_visible_subtitle_segments()
-        comment_result = self._collect_top_comments(snapshot, debug_label=debug_label)
-        snapshot.top_comments = comment_result.comments
-        snapshot.top_comments_source = comment_result.source
-        snapshot.comment_collection_status = comment_result.status
-        snapshot.comment_collection_debug = comment_result.debug
-        snapshot.keyframe_paths = self._capture_keyframes(debug_label=debug_label, count=keyframe_count)
-        snapshot.video_text_bundle = _build_video_text_bundle(
-            title_text=snapshot.video_title_text,
-            description_text=snapshot.video_description_raw,
-            expanded_description_text=snapshot.expanded_description_text,
-            chapter_texts=snapshot.chapter_texts,
-            related_search_terms=snapshot.related_search_terms,
-            author_statement_texts=snapshot.author_statement_texts,
-            visible_subtitle_segments=snapshot.visible_subtitle_segments,
-            top_comments=snapshot.top_comments,
-        )
-        self.logger.info(
-            "content snapshot collected",
-            extra={
-                "page_url": snapshot.page_url,
-                "page_title": snapshot.page_title,
-                "feed_identity": snapshot.feed_identity,
-                "creator_name": snapshot.creator_name,
-                "video_url": snapshot.video_url,
-                "video_url_capture_source": snapshot.video_url_capture_source,
-                "chapter_count": len(snapshot.chapter_texts),
-                "related_search_count": len(snapshot.related_search_terms),
-                "author_statement_count": len(snapshot.author_statement_texts),
-                "subtitle_count": len(snapshot.visible_subtitle_segments),
-                "comment_count": len(snapshot.top_comments),
-                "comment_source": snapshot.top_comments_source,
-                "comment_collection_status": snapshot.comment_collection_status,
-                "comment_collection_debug": snapshot.comment_collection_debug,
-                "keyframe_count": len(snapshot.keyframe_paths),
-                "debug_label": debug_label,
-            },
-        )
-        return snapshot
+            snapshot.video_description_raw = _merge_description_text(description_raw, network_description)
+            snapshot.expanded_description_text = _merge_description_text(
+                _clean_video_description_text(snapshot.raw_text, limit=960),
+                network_expanded_description,
+            )
+            if not _is_meaningfully_distinct(snapshot.expanded_description_text, snapshot.video_description_raw):
+                snapshot.expanded_description_text = None
+            raw_metadata_source = " ".join(
+                part
+                for part in (
+                    snapshot.raw_text,
+                    network_match.get("description") if network_match else None,
+                )
+                if part
+            )
+            snapshot.chapter_texts = _extract_chapter_texts(raw_metadata_source)
+            snapshot.related_search_terms = _extract_related_search_terms(raw_metadata_source)
+            snapshot.author_statement_texts = _extract_author_statement_texts(raw_metadata_source)
+            snapshot.visible_subtitle_segments = self._collect_visible_subtitle_segments()
+            comment_result = self._collect_top_comments(snapshot, debug_label=debug_label)
+            snapshot.top_comments = comment_result.comments
+            snapshot.top_comments_source = comment_result.source
+            snapshot.comment_collection_status = comment_result.status
+            snapshot.comment_collection_debug = comment_result.debug
+            snapshot.keyframe_paths = self._capture_keyframes(debug_label=debug_label, count=keyframe_count)
+            snapshot.video_text_bundle = _build_video_text_bundle(
+                title_text=snapshot.video_title_text,
+                description_text=snapshot.video_description_raw,
+                expanded_description_text=snapshot.expanded_description_text,
+                chapter_texts=snapshot.chapter_texts,
+                related_search_terms=snapshot.related_search_terms,
+                author_statement_texts=snapshot.author_statement_texts,
+                visible_subtitle_segments=snapshot.visible_subtitle_segments,
+                top_comments=snapshot.top_comments,
+            )
+            self.logger.info(
+                "content snapshot collected",
+                extra={
+                    "page_url": snapshot.page_url,
+                    "page_title": snapshot.page_title,
+                    "feed_identity": snapshot.feed_identity,
+                    "creator_name": snapshot.creator_name,
+                    "video_url": snapshot.video_url,
+                    "video_url_capture_source": snapshot.video_url_capture_source,
+                    "chapter_count": len(snapshot.chapter_texts),
+                    "related_search_count": len(snapshot.related_search_terms),
+                    "author_statement_count": len(snapshot.author_statement_texts),
+                    "subtitle_count": len(snapshot.visible_subtitle_segments),
+                    "comment_count": len(snapshot.top_comments),
+                    "comment_source": snapshot.top_comments_source,
+                    "comment_collection_status": snapshot.comment_collection_status,
+                    "comment_collection_debug": snapshot.comment_collection_debug,
+                    "keyframe_count": len(snapshot.keyframe_paths),
+                    "debug_label": debug_label,
+                },
+            )
+            return snapshot
 
     def _collect_visible_subtitle_segments(self, sample_count: int = 3) -> list[str]:
         merged: list[str] = []
@@ -1292,69 +1410,553 @@ class DouyinPageAdapter:
             except Exception:
                 continue
         return not self._is_login_modal_open()
+    #关闭评论面板
+    def _close_comments_panel(
+        self,
+        debug_label: str | None = None,
+    ) -> bool:
+        """Close Douyin comment panel reliably.
 
-    def _close_comments_panel(self, debug_label: str | None = None) -> bool:
-        strategies: list[tuple[str, object]] = []
-        strategies.extend([("keyboard", "Escape"), ("keyboard", "Escape")])
-        panel = first_visible_locator(self.page, selectors.COMMENT_PANEL_SELECTORS, timeout_ms=500)
-        if panel is not None:
-            for selector in selectors.COMMENT_CLOSE_SELECTORS:
+        Returns True if the page no longer looks like the comment panel is open.
+        """
+        def _get_body_text(limit: int = 1200) -> str:
+            try:
+                text = self.page.locator("body").inner_text(timeout=1200)
+            except Exception:
+                return ""
+            return text[:limit]
+
+        def _panel_is_open() -> bool:
+            body_text = _get_body_text()
+
+            comment_hints = [
+                "全部评论",
+                "留下你的精彩评论吧",
+                "暂无评论",
+                "抢首评",
+                "加载中",
+            ]
+
+            footer_pollution_hints = [
+                "开启读屏标签",
+                "读屏标签已关闭",
+                "下载抖音精选",
+                "京ICP备",
+                "网络文化经营许可证",
+            ]
+
+            # 评论面板明确打开
+            if any(hint in body_text for hint in comment_hints):
+                return True
+
+            # 页面已经被面板/滚动污染成页脚，也当作未恢复干净
+            if any(hint in body_text for hint in footer_pollution_hints):
+                return True
+
+            return False
+
+        def _log_state(method: str) -> bool:
+            panel_open = _panel_is_open()
+            self.logger.info(
+                "comment panel close final state",
+                extra={
+                    "debug_label": debug_label,
+                    "method": method,
+                    "panel_open": panel_open,
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                    "body_preview": _get_body_text(limit=300),
+                },
+            )
+            return not panel_open
+
+        try:
+            # 1. 先按 Escape，多按几次。第一下经常只是取消输入框焦点。
+            for _ in range(5):
                 try:
-                    button = panel.locator(selector).first
-                    if self._is_likely_panel_close_target(button, min_y=36):
-                        strategies.append((f"panel_close_button:{selector}", button))
-                        break
+                    self.page.keyboard.press("Escape")
+                    self.page.wait_for_timeout(300)
+                    if not _panel_is_open():
+                        return _log_state("escape")
+                except Exception:
+                    pass
+
+            # 2. 尝试点击常见关闭 selector。
+            close_selectors = [
+                '[aria-label*="关闭"]',
+                '[title*="关闭"]',
+                'button:has-text("关闭")',
+                'div[role="button"]:has-text("关闭")',
+                'text=关闭',
+            ]
+
+            for selector in close_selectors:
+                try:
+                    locator = self.page.locator(selector).first
+                    if locator.count() > 0 and locator.is_visible(timeout=500):
+                        locator.click(timeout=1000)
+                        self.page.wait_for_timeout(600)
+                        if not _panel_is_open():
+                            return _log_state(f"selector:{selector}")
                 except Exception:
                     continue
 
-        for method, target in strategies:
+            # 3. 用 DOM 几何定位评论面板，并点击面板顶部可能的关闭按钮。
+            # 这个比找文字更可靠。
             try:
-                if method == "keyboard":
-                    self.page.keyboard.press(str(target))
-                else:
-                    target.click(timeout=1_000)
-            except Exception as exc:
+                result = self.page.evaluate(
+                    """
+                    () => {
+                        const vw = window.innerWidth || document.documentElement.clientWidth;
+                        const vh = window.innerHeight || document.documentElement.clientHeight;
+
+                        function visible(el) {
+                            const style = window.getComputedStyle(el);
+                            if (!style) return false;
+                            if (style.display === "none" || style.visibility === "hidden") return false;
+                            if (Number(style.opacity || "1") === 0) return false;
+
+                            const r = el.getBoundingClientRect();
+                            if (!r || r.width <= 0 || r.height <= 0) return false;
+
+                            return r.right > 0 && r.left < vw && r.bottom > 0 && r.top < vh;
+                        }
+
+                        function textOf(el) {
+                            return [
+                                el.innerText || "",
+                                el.textContent || "",
+                                el.getAttribute("aria-label") || "",
+                                el.getAttribute("title") || "",
+                                el.getAttribute("class") || "",
+                                el.getAttribute("data-e2e") || "",
+                            ].join(" ");
+                        }
+
+                        function rectObj(el) {
+                            const r = el.getBoundingClientRect();
+                            return {
+                                left: Math.round(r.left),
+                                top: Math.round(r.top),
+                                right: Math.round(r.right),
+                                bottom: Math.round(r.bottom),
+                                width: Math.round(r.width),
+                                height: Math.round(r.height),
+                                cx: Math.round(r.left + r.width / 2),
+                                cy: Math.round(r.top + r.height / 2),
+                            };
+                        }
+
+                        // A. 找评论面板容器：包含“全部评论/留下你的精彩评论吧/暂无评论”的大块区域
+                        const all = Array.from(document.querySelectorAll("div, section, aside"));
+                        const panels = [];
+
+                        for (const el of all) {
+                            if (!visible(el)) continue;
+
+                            const text = textOf(el);
+                            if (
+                                !text.includes("全部评论") &&
+                                !text.includes("留下你的精彩评论吧") &&
+                                !text.includes("暂无评论") &&
+                                !text.includes("抢首评")
+                            ) {
+                                continue;
+                            }
+
+                            const r = el.getBoundingClientRect();
+
+                            // 评论面板通常较大，并且在页面右侧或中右侧
+                            if (r.width < 250 || r.height < 250) continue;
+                            if (r.left < vw * 0.35) continue;
+
+                            panels.push({
+                                el,
+                                score: r.width * r.height + r.left,
+                                rect: rectObj(el),
+                                text: text.slice(0, 120),
+                            });
+                        }
+
+                        panels.sort((a, b) => b.score - a.score);
+
+                        if (panels.length === 0) {
+                            return {
+                                clicked: false,
+                                reason: "no_comment_panel_found",
+                                panels: [],
+                            };
+                        }
+
+                        const panel = panels[0];
+                        const pr = panel.el.getBoundingClientRect();
+
+                        // B. 在评论面板顶部区域找小按钮，优先 close/X/关闭
+                        const clickableNodes = Array.from(
+                            document.querySelectorAll("button, [role='button'], [aria-label], [title], svg, path, div")
+                        );
+
+                        const candidatesMap = new Map();
+
+                        function clickableAncestor(node) {
+                            let cur = node;
+                            for (let i = 0; i < 7 && cur; i++) {
+                                const r = cur.getBoundingClientRect();
+                                const tag = (cur.tagName || "").toLowerCase();
+                                const role = cur.getAttribute("role") || "";
+                                const cls = cur.getAttribute("class") || "";
+                                const aria = cur.getAttribute("aria-label") || "";
+                                const title = cur.getAttribute("title") || "";
+
+                                const goodSize =
+                                    r.width >= 14 &&
+                                    r.width <= 90 &&
+                                    r.height >= 14 &&
+                                    r.height <= 90;
+
+                                const maybeClickable =
+                                    tag === "button" ||
+                                    role === "button" ||
+                                    aria ||
+                                    title ||
+                                    cls;
+
+                                if (goodSize && maybeClickable) {
+                                    return cur;
+                                }
+
+                                cur = cur.parentElement;
+                            }
+                            return node;
+                        }
+
+                        for (const node of clickableNodes) {
+                            const el = clickableAncestor(node);
+                            if (!el || !visible(el)) continue;
+
+                            const r = el.getBoundingClientRect();
+                            const cx = r.left + r.width / 2;
+                            const cy = r.top + r.height / 2;
+
+                            // 必须在评论面板内部/附近
+                            if (cx < pr.left || cx > pr.right) continue;
+
+                            // 只看评论面板顶部 25% 区域，关闭按钮通常在顶部
+                            if (cy < pr.top || cy > pr.top + pr.height * 0.28) continue;
+
+                            if (r.width > 90 || r.height > 90) continue;
+
+                            const text = textOf(el);
+                            const lower = text.toLowerCase();
+
+                            let score = 0;
+
+                            if (text.includes("关闭")) score += 100;
+                            if (lower.includes("close")) score += 100;
+                            if (lower.includes("x")) score += 15;
+
+                            // 越靠右上越像关闭按钮
+                            score += (cx - pr.left) / Math.max(1, pr.width) * 40;
+                            score += (1 - (cy - pr.top) / Math.max(1, pr.height)) * 40;
+
+                            const key = [
+                                Math.round(r.left),
+                                Math.round(r.top),
+                                Math.round(r.width),
+                                Math.round(r.height),
+                            ].join(":");
+
+                            if (!candidatesMap.has(key)) {
+                                candidatesMap.set(key, {
+                                    el,
+                                    score,
+                                    rect: rectObj(el),
+                                    text: text.trim().slice(0, 100),
+                                });
+                            }
+                        }
+
+                        const candidates = Array.from(candidatesMap.values())
+                            .sort((a, b) => b.score - a.score);
+
+                        const debugCandidates = candidates.slice(0, 8).map(c => ({
+                            score: Math.round(c.score),
+                            rect: c.rect,
+                            text: c.text,
+                        }));
+
+                        if (candidates.length > 0) {
+                            const best = candidates[0];
+                            best.el.click();
+
+                            return {
+                                clicked: true,
+                                reason: "clicked_panel_top_close_candidate",
+                                panel: {
+                                    rect: panel.rect,
+                                    text: panel.text,
+                                },
+                                target: {
+                                    score: Math.round(best.score),
+                                    rect: best.rect,
+                                    text: best.text,
+                                },
+                                candidates: debugCandidates,
+                            };
+                        }
+
+                        // C. 如果没有找到按钮，点击评论面板外的左侧视频区域，让面板失焦
+                        const clickX = Math.round(vw * 0.28);
+                        const clickY = Math.round(vh * 0.50);
+                        const target = document.elementFromPoint(clickX, clickY);
+
+                        if (target) {
+                            target.click();
+                            return {
+                                clicked: true,
+                                reason: "clicked_outside_panel",
+                                panel: {
+                                    rect: panel.rect,
+                                    text: panel.text,
+                                },
+                                targetPoint: { x: clickX, y: clickY },
+                                candidates: debugCandidates,
+                            };
+                        }
+
+                        return {
+                            clicked: false,
+                            reason: "no_close_candidate_and_no_outside_target",
+                            panel: {
+                                rect: panel.rect,
+                                text: panel.text,
+                            },
+                            candidates: debugCandidates,
+                        };
+                    }
+                    """
+                )
+
                 self.logger.info(
-                    "comment panel close attempt failed",
+                    "comment panel close candidate clicked",
                     extra={
                         "debug_label": debug_label,
-                        "method": method,
-                        "error_text": str(exc),
+                        "result": result,
                     },
                 )
-                continue
-            self._wait_for_timeout_safe(500, reason=f"comment_panel_close_{method}")
-            if self._looks_like_self_profile(self.page.url):
-                return self._recover_from_self_profile(debug_label=debug_label)
-            if not self._is_comment_panel_open():
+
+                self.page.wait_for_timeout(700)
+
+                # 如果刚才只是点了外部区域，再补 Escape
+                try:
+                    self.page.keyboard.press("Escape")
+                    self.page.wait_for_timeout(400)
+                except Exception:
+                    pass
+
+                if not _panel_is_open():
+                    return _log_state("geometry_or_outside_click")
+
+            except Exception as exc:
                 self.logger.info(
-                    "comment panel closed",
-                    extra={"debug_label": debug_label, "method": method},
+                    "failed to click comment panel close candidate",
+                    extra={
+                        "debug_label": debug_label,
+                        "error": str(exc),
+                    },
                 )
-                side_panel_ok = self._dismiss_feed_side_panel(reason="comment_close", debug_label=debug_label)
-                login_ok = self._dismiss_login_modal(reason="comment_close", debug_label=debug_label)
-                return side_panel_ok and login_ok
 
-        if self._looks_like_self_profile(self.page.url):
-            return self._recover_from_self_profile(debug_label=debug_label)
-        if self._has_feed_side_panel():
-            self._dismiss_feed_side_panel(reason="comment_close_force", debug_label=debug_label)
-        still_open = self._is_comment_panel_open()
-        if (
-            not still_open
-            and self._dismiss_feed_side_panel(reason="comment_close_final", debug_label=debug_label)
-            and self._dismiss_login_modal(reason="comment_close_final", debug_label=debug_label)
-        ):
-            return True
-        self.logger.info(
-            "comment panel close final state",
-            extra={
-                "debug_label": debug_label,
-                "panel_open": still_open,
-            },
-        )
-        return not still_open
+            # 4. 最后兜底：点击左上角视频安全区域，不点右侧按钮栏，避免误入直播/分享。
+            try:
+                viewport = self.page.viewport_size or {"width": 1440, "height": 900}
 
+                safe_points = [
+                    (0.25, 0.30),
+                    (0.30, 0.50),
+                    (0.22, 0.70),
+                ]
+
+                for x_ratio, y_ratio in safe_points:
+                    self.page.mouse.click(
+                        int(viewport["width"] * x_ratio),
+                        int(viewport["height"] * y_ratio),
+                    )
+                    self.page.wait_for_timeout(300)
+                    self.page.keyboard.press("Escape")
+                    self.page.wait_for_timeout(400)
+
+                    if not _panel_is_open():
+                        return _log_state("safe_area_click_escape")
+
+            except Exception:
+                pass
+
+            panel_open = _panel_is_open()
+
+            self.logger.info(
+                "comment panel close final state",
+                extra={
+                    "debug_label": debug_label,
+                    "method": "failed_all_attempts",
+                    "panel_open": panel_open,
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                    "body_preview": _get_body_text(limit=500),
+                },
+            )
+
+            if panel_open:
+                self.logger.warning(
+                    "comment panel remained open after close attempts",
+                    extra={
+                        "debug_label": debug_label,
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                    },
+                )
+
+                self._recover_recommend_feed_if_polluted(
+                    debug_label=f"{debug_label}_after_comment_close_failed"
+                )
+
+            return not panel_open
+
+        except Exception as exc:
+            self.logger.warning(
+                "failed to close comment panel",
+                extra={
+                    "debug_label": debug_label,
+                    "error": str(exc),
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                },
+            )
+            return False
+        
+    def _page_text_looks_polluted(self) -> bool:
+        try:
+            body_text = self.page.locator("body").inner_text(timeout=1200)
+        except Exception:
+            return False
+
+        footer_hints = [
+            "开启读屏标签",
+            "读屏标签已关闭",
+            "京ICP备",
+            "京公网安备",
+            "用户服务协议",
+            "隐私政策",
+            "站点地图",
+        ]
+
+        video_hints = [
+            "听抖音",
+            "发送",
+            "倍速",
+            "清屏",
+            "连播",
+            "@",
+            "评论",
+        ]
+
+        has_footer = any(hint in body_text for hint in footer_hints)
+        has_video = any(hint in body_text for hint in video_hints)
+
+        # 只有页脚明显存在，而且没有视频信息，才算污染
+        return has_footer and not has_video
+    
+    def _recover_recommend_feed_if_polluted(
+        self,
+        debug_label: str | None = None,
+    ) -> bool:
+        """Recover from footer/polluted page state back to Douyin recommend feed.
+
+        This is used when comment panel closing leaves the page reading footer/global text
+        instead of a real active video card.
+        """
+        try:
+            is_live_url = "/root/live/" in (self.page.url or "")
+            is_polluted = self._page_text_looks_polluted()
+
+            if not is_live_url and not is_polluted:
+                return True
+
+            self.logger.warning(
+                "recovering recommend feed from polluted/live state",
+                extra={
+                    "debug_label": debug_label,
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                    "is_live_url": is_live_url,
+                    "is_polluted": is_polluted,
+                },
+            )
+
+            # 1. 先按 Escape，关闭残留弹层
+            for _ in range(3):
+                try:
+                    self.page.keyboard.press("Escape")
+                    self.page.wait_for_timeout(250)
+                except Exception:
+                    pass
+
+            # 2. 强制回推荐流，避免继续停留在页脚/直播间/错误状态
+            try:
+                self.page.goto(
+                    "https://www.douyin.com/?recommend=1&from_nav=1",
+                    wait_until="domcontentloaded",
+                    timeout=15000,
+                )
+            except Exception:
+                pass
+
+            self.page.wait_for_timeout(3500)
+
+            # 3. 再按 Escape 清浮层
+            for _ in range(2):
+                try:
+                    self.page.keyboard.press("Escape")
+                    self.page.wait_for_timeout(250)
+                except Exception:
+                    pass
+
+            # 4. 尝试往下一条稳定视频推进
+            try:
+                self.scroll_to_next_video(
+                    debug_label=f"{debug_label}_recover_next" if debug_label else "recover_next",
+                )
+            except Exception:
+                pass
+
+            self.page.wait_for_timeout(1200)
+
+            recovered = not self._page_text_looks_polluted() and "/root/live/" not in (
+                self.page.url or ""
+            )
+
+            self.logger.info(
+                "recommend feed recovery completed",
+                extra={
+                    "debug_label": debug_label,
+                    "recovered": recovered,
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                },
+            )
+
+            return recovered
+
+        except Exception as exc:
+            self.logger.warning(
+                "failed to recover recommend feed from polluted state",
+                extra={
+                    "debug_label": debug_label,
+                    "error": str(exc),
+                    "page_url": self.page.url if self.page else None,
+                },
+            )
+            return False
+        
     def _extract_ui_comment_items(self) -> tuple[list[CommentSnippet], bool]:
         try:
             items = self.page.evaluate(
@@ -1482,10 +2084,29 @@ class DouyinPageAdapter:
                 homepage_open_state="live_skipped",
                 homepage_close_state="live_skipped",
             )
+        if _looks_like_commerce_feed_item(feed_snapshot.raw_text): #添加商品卡跳过
+            self.logger.info(
+                "commerce feed item detected; skipping homepage open and moving on",
+                extra={
+                    "observation_index": observation_index,
+                    "creator_name": feed_snapshot.creator_name,
+                    "page_url": feed_snapshot.page_url,
+                    "page_title": feed_snapshot.page_title,
+                    "feed_identity": feed_snapshot.feed_identity,
+                    "active_text_summary": feed_snapshot.active_text_summary,
+                },
+            )
+            return HomepageBrowseResult(
+                observation_index=observation_index,
+                feed_snapshot=feed_snapshot,
+                homepage_open_state="commerce_skipped",
+                homepage_close_state="commerce_skipped",
+            )#
         try:
             homepage_snapshot, screenshot_path = self.open_creator_homepage_with_f(
                 observation_index=observation_index,
                 debug_label=debug_label,
+                candidate=feed_snapshot, # 把当前视频信息 feed_snapshot 传进 open_creator_homepage_with_f()
             )
             profile_snapshot = self.extract_basic_profile_snapshot(feed_snapshot)
             close_snapshot = self.close_creator_homepage_with_f(debug_label=debug_label)
@@ -1578,33 +2199,56 @@ class DouyinPageAdapter:
             notes=["已执行主页暂停与回顶逻辑"],
         )
 
+    # page.py
     def extract_basic_profile_snapshot(self, candidate: FeedCandidateSnapshot) -> ProfileAnalysisSnapshot:
         panel_text = self._extract_profile_panel_text()
         stats_text = first_text(self.page, selectors.PROFILE_PANEL_STATS_SELECTORS)
         text = panel_text or body_text(self.page)
+
         creator_name = (
             _extract_profile_panel_name(panel_text)
             or _sanitize_creator_name(candidate.creator_name)
             or _extract_creator_name(text)
         )
+
         follower_count_raw = _extract_followers(stats_text or "") or _extract_followers(text)
         total_liked_count_raw = _extract_total_likes(stats_text or "") or _extract_total_likes(text)
+
+        # 最新 15 条非置顶作品
+        raw_recent_cards = self._collect_video_cards(limit=40)
+        raw_recent_cards = [card for card in raw_recent_cards if not card.is_pinned] or raw_recent_cards
+        
+        recent_cards = _compact_profile_video_cards(
+            raw_recent_cards,
+            limit=15,
+            total_liked_count_raw=total_liked_count_raw,
+        )
+
+        self.logger.info(
+            "profile recent works extracted",
+            extra={
+                "creator_name": creator_name,
+                "recent_work_count": len(recent_cards),
+                "recent_like_raws": [card.like_raw for card in recent_cards],
+                "recent_titles": [card.title for card in recent_cards],
+            },
+        )
+
+
         return ProfileAnalysisSnapshot(
             creator_name=creator_name,
             follower_count_raw=follower_count_raw,
             total_liked_count_raw=total_liked_count_raw,
             profile_bio=first_text(self.page, selectors.PROFILE_BIO_SELECTORS),
             recommendation_video_like_raw=candidate.like_count_raw,
-            recent_video_like_raws=[],
-            recent_video_titles=[],
+            recent_video_like_raws=[card.like_raw for card in recent_cards],
+            recent_video_titles=[card.title for card in recent_cards],
             visible_scenes=[],
             notes=[
                 "已执行最小主页抓取流程",
-                f"profile_stats_source={'author_card_user_stats' if stats_text else 'panel_or_body_regex'}",
-                "profile_source=right_panel" if panel_text else "profile_source=body_fallback",
+                f"profile_recent_work_count={len(recent_cards)}",
             ],
         )
-
     def _extract_profile_panel_text(self) -> str | None:
         try:
             panel_text = self.page.evaluate(
@@ -1646,10 +2290,11 @@ class DouyinPageAdapter:
         cleaned = panel_text.strip()
         return cleaned or None
 
-    def open_creator_homepage_with_f(
+    def open_creator_homepage_with_f( # modified
         self,
         observation_index: int,
         debug_label: str | None = None,
+        candidate: FeedCandidateSnapshot | None = None,#modified
     ) -> tuple[PageStateSnapshot, str | None]:
         preflight = self.classify_page_state(
             debug_label=f"{debug_label}_homepage_preflight" if debug_label else "homepage_preflight",
@@ -1701,10 +2346,16 @@ class DouyinPageAdapter:
             self._focus_feed_shell()
         else:
             self._focus_active_feed(state)
-        if not _normalize_url((state or {}).get("creator_profile_url")):
+        #modified
+        creator_profile_url = _normalize_url(
+            (state or {}).get("creator_profile_url")
+            or (candidate.creator_profile_url if candidate else None)
+        )
+
+        if not creator_profile_url:
             screenshot = self._capture(
                 f"douyin_creator_homepage_no_author_link_{debug_label}" if debug_label else "douyin_creator_homepage_no_author_link"
-            )
+            ) #modified
             raise PageStructureUncertainError(
                 reason=BlockReason.PAGE_STRUCTURE_UNCERTAINTY,
                 message="当前激活推荐卡片缺少达人主页链接，跳过 F 键主页打开，避免误入我的主页。",
@@ -1751,6 +2402,36 @@ class DouyinPageAdapter:
         if current_snapshot.state not in {"recommend_feed_shell", "recommend_feed_interactable", "recommended_feed_ready"}:
             raise self._snapshot_to_blocking_error(current_snapshot, page_name="douyin_creator_homepage_open")
         previous_url = self.page.url
+        #不要在直播里按F
+        if "/root/live/" in (self.page.url or ""):
+            self.logger.warning(
+                "skip F-key homepage open because current page is live room",
+                extra={
+                    "debug_label": debug_label,
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                },
+            )
+
+            try:
+                self.page.goto(
+                    "https://www.douyin.com/?recommend=1",
+                    wait_until="domcontentloaded",
+                    timeout=15000,
+                )
+                self.page.wait_for_timeout(1500)
+            except Exception:
+                pass
+
+            raise PageStructureUncertainError(
+                reason=BlockReason.PAGE_STRUCTURE_UNCERTAINTY,
+                message="当前页面是直播间，跳过 F 键主页打开，避免卡在直播页面。",
+                page_name="douyin_live_room",
+                page_state="live_room_before_f_key",
+                required_user_action="No manual action needed. The workflow should skip this live item and move to the next video.",
+                needs_user_action=False,
+                resumable=True,
+            )
         self.logger.info(
             "pressing f to open creator homepage",
             extra={
@@ -1760,8 +2441,33 @@ class DouyinPageAdapter:
                 "feed_identity": _state_identity(state),
             },
         )
+        self._prepare_feed_focus_before_homepage_open(debug_label=debug_label) # 在按 F 之前，先清理页面焦点。
         self.page.keyboard.press("f")
         snapshot = self._wait_for_creator_homepage_state(opening=True, previous_url=previous_url, debug_label=debug_label)
+        # 修改方法3: 如果 F 没成功，但手里有 creator_profile_url，就直接 page.goto(达人主页链接)，再重新判断页面状态
+        if snapshot.state != "creator_homepage_open" and creator_profile_url:
+            self.logger.info(
+                "F-key homepage entry failed after overlay cleanup; trying direct creator profile URL",
+                extra={
+                    "creator_profile_url": creator_profile_url,
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                    "debug_label": debug_label,
+                },
+            )
+
+            self.page.goto(
+                creator_profile_url,
+                wait_until="domcontentloaded",
+                timeout=45_000,
+            )
+            self.page.wait_for_timeout(1_500)
+
+            snapshot = self.classify_page_state(
+                debug_label=f"{debug_label}_homepage_direct_url" if debug_label else "homepage_direct_url",
+                capture=True,
+            )
+        # 修改方法3结束
         if snapshot.state == "self_profile_open":
             raise PageStructureUncertainError(
                 reason=BlockReason.PAGE_STRUCTURE_UNCERTAINTY,
@@ -1868,7 +2574,7 @@ class DouyinPageAdapter:
                 pass
         try:
             self.page.go_back(wait_until="domcontentloaded")
-            self.page.wait_for_timeout(800)
+            self.page.wait_for_timeout(1500)
             if self._extract_active_feed_state() is not None:
                 return
         except Exception:
@@ -3013,160 +3719,80 @@ class DouyinPageAdapter:
             return snapshot.state in {"recommend_feed_shell", "recommend_feed_interactable", "recommended_feed_ready"}
         except Exception:
             return self._extract_active_feed_state() is not None
-
+        
     def enter_recommend_feed_from_jingxuan(self) -> bool:
+        """
+        进入 Douyin 推荐流，不依赖首页 URL 是 /jingxuan。
+        如果当前页无法直接点击推荐，直接跳转到 ?recommend=1
+        """
+        # 确保页面打开
         if not self._ensure_page_open(goto_base=False, reason="enter_recommend_feed_from_jingxuan"):
             return False
-        current_url = (self.page.url or "").lower()
-        if "/jingxuan" not in current_url:
-            return False
-        locator = self._find_jingxuan_recommend_target(timeout_ms=800)
-        if locator is None:
+
+        direct_recommend_url = "https://www.douyin.com/?recommend=1&from_nav=1"
+
+        # 关键函数：直接跳推荐流
+        def _goto_direct_recommend(reason: str) -> bool:
             self.logger.info(
-                "jingxuan recommend target not yet visible",
+                "跳转到直接推荐流",
                 extra={
-                    "page_url": self.page.url,
+                    "reason": reason,
+                    "page_url": getattr(self.page, "url", None),
                     "page_title": self._safe_title(),
+                    "direct_recommend_url": direct_recommend_url,
                 },
             )
-            return False
-        recommend_href = self._extract_recommend_href(locator)
-        self.logger.info(
-            "推荐 anchor found",
-            extra={
-                "page_url": self.page.url,
-                "page_title": self._safe_title(),
-                "recommend_href": recommend_href,
-            },
-        )
-        if recommend_href:
-            self.logger.info(
-                "recommend href extracted",
-                extra={
-                    "page_url": self.page.url,
-                    "page_title": self._safe_title(),
-                    "recommend_href": recommend_href,
-                },
-            )
-        used_direct_navigation = False
-        if self._looks_like_recommend_href(recommend_href):
             try:
-                self.logger.info(
-                    "navigating directly to recommend href",
-                    extra={
-                        "page_url": self.page.url,
-                        "page_title": self._safe_title(),
-                        "recommend_href": recommend_href,
-                    },
+                self.page.goto(
+                    direct_recommend_url,
+                    wait_until="domcontentloaded",
+                    timeout=25_000,
                 )
-                self.page.goto(recommend_href, wait_until="domcontentloaded", timeout=25_000)
-                used_direct_navigation = True
+                self.page.wait_for_timeout(2_500)
             except Exception as exc:
-                if _is_target_closed_error(exc):
-                    self._mark_jingxuan_recommend_blocked(
-                        "推荐 href 直达过程中页面被关闭，导航未完成，可能被浏览器原生外部协议提示打断。"
-                    )
-                    return False
-                self.logger.warning("douyin recommend direct navigation failed: %s", exc)
-        else:
-            self.logger.info(
-                "falling back to UI click because href extraction failed",
-                extra={
-                    "page_url": self.page.url,
-                    "page_title": self._safe_title(),
-                    "recommend_href": recommend_href,
-                },
-            )
-        try:
-            if not used_direct_navigation:
-                self.logger.info(
-                    "attempting to click 推荐",
+                self.logger.warning(
+                    "直接推荐流跳转失败",
                     extra={
-                        "page_url": self.page.url,
+                        "reason": reason,
+                        "error": str(exc),
+                        "page_url": getattr(self.page, "url", None),
                         "page_title": self._safe_title(),
                     },
                 )
+                return False
+
+            # 尝试清理可能存在的弹窗或浮层
+            for key in ("Escape", "Escape", "ArrowDown"):
                 try:
-                    locator.scroll_into_view_if_needed(timeout=1_000)
+                    self.page.keyboard.press(key)
+                    self.page.wait_for_timeout(500)
                 except Exception:
                     pass
-                locator.click(timeout=1_200)
-        except Exception as exc:
-            if _is_target_closed_error(exc):
-                self._mark_jingxuan_recommend_blocked("点击 jingxuan 左侧推荐时页面被关闭或被浏览器原生外部应用行为打断。")
-                return False
             try:
-                locator.click(timeout=800, force=True)
-            except Exception as force_exc:
-                if _is_target_closed_error(force_exc):
-                    self._mark_jingxuan_recommend_blocked("点击 jingxuan 左侧推荐时页面被关闭或被浏览器原生外部应用行为打断。")
-                    return False
-                self._mark_jingxuan_recommend_blocked(
-                    f"推荐入口 UI click fallback 失败，元素已定位但无法进入稳定可点击状态：{force_exc}"
-                )
-                self.logger.warning("douyin 推荐 click failed on jingxuan: %s", force_exc)
-                return False
-        self._jingxuan_recommend_selected = True
-        wait_reason = "jingxuan_recommend_href_navigation" if used_direct_navigation else "jingxuan_recommend_click"
-        if not self._wait_for_timeout_safe(1_200, reason=wait_reason):
-            if not used_direct_navigation:
-                self._mark_jingxuan_recommend_blocked("点击 jingxuan 左侧推荐后等待阶段被浏览器原生外部应用行为打断。")
-            return False
-        post_snapshot = self.classify_page_state(
-            debug_label="post_jingxuan_recommend_href" if used_direct_navigation else "post_jingxuan_recommend_click",
-            capture=True,
-        )
-        if post_snapshot.state == "recommended_feed_ready":
-            self._clear_jingxuan_recommend_block()
-            self.logger.info(
-                "recommend feed ready after 推荐 entry",
-                extra={
-                    "page_url": post_snapshot.page_url,
-                    "page_title": post_snapshot.page_title,
-                    "entry_method": "direct_href" if used_direct_navigation else "ui_click",
-                },
-            )
-            return True
-        if post_snapshot.state == "visual_feed_unstable":
-            self._clear_jingxuan_recommend_block()
-            self.logger.info(
-                "recommend entry reached feed shell but anchors are still hydrating",
-                extra={
-                    "page_url": post_snapshot.page_url,
-                    "page_title": post_snapshot.page_title,
-                    "missing_readiness_anchors": post_snapshot.missing_readiness_anchors,
-                    "entry_method": "direct_href" if used_direct_navigation else "ui_click",
-                },
-            )
-            return True
-        if "/jingxuan" in ((post_snapshot.page_url or "").lower()) and not used_direct_navigation:
-            self._mark_jingxuan_recommend_blocked(
-                "推荐入口 UI click 后仍停留在 jingxuan，且页面未推进到推荐流，推测被浏览器原生 open-app / xdg-open 提示打断。"
-            )
-            self.logger.warning(
-                "blocked by external app prompt",
-                extra={
-                    "page_url": post_snapshot.page_url,
-                    "page_title": post_snapshot.page_title,
-                    "page_state": post_snapshot.state,
-                    "browser_native_prompt_inferred": True,
-                    "inference_evidence": "ui_click_attempted_and_page_remained_on_jingxuan",
-                },
-            )
-            return False
-        self._clear_jingxuan_recommend_block()
-        return post_snapshot.state in {"public_feed", "visual_feed_unstable", "recommended_feed_ready"}
+                self.page.mouse.wheel(0, 1000)
+                self.page.wait_for_timeout(800)
+            except Exception:
+                pass
 
-    def prepare_jingxuan_retry_after_operator_recovery(self) -> None:
-        self._clear_jingxuan_recommend_block()
-        self._jingxuan_recommend_selected = False
-        self.logger.info(
-            "retrying recommend entry after operator recovery",
-            extra={
-                "page_url": self.page.url if self.page and not self.page.is_closed() else None,
-                "browser_will_remain_open": True,
-            },
-        )
+            return True
+
+        # 1️⃣ 如果当前页有“推荐”按钮，尝试点击
+        locator = self._find_jingxuan_recommend_target(timeout_ms=800)
+        if locator:
+            try:
+                locator.scroll_into_view_if_needed(timeout=1_000)
+                locator.click(timeout=1_200)
+                self._wait_for_timeout_safe(1_500, reason="jingxuan_recommend_click")
+                self.logger.info(
+                    "点击 jingxuan 推荐成功"
+                )
+                return True
+            except Exception:
+                # 点击失败直接跳推荐流
+                return _goto_direct_recommend("recommend_click_failed")
+        else:
+            # 找不到按钮直接跳推荐流
+            return _goto_direct_recommend("recommend_target_not_visible")
 
     def _find_jingxuan_recommend_target(self, timeout_ms: int = 600):
         return first_visible_locator(self.page, selectors.JINGXUAN_RECOMMEND_SELECTORS, timeout_ms=timeout_ms)
@@ -3236,7 +3862,7 @@ class DouyinPageAdapter:
                 )
                 return self._ensure_page_open(goto_base=True, reason=f"reopen_after_wait:{reason}")
             raise
-
+    
     def _ensure_page_open(self, goto_base: bool, reason: str) -> bool:
         if self.page is not None:
             try:
@@ -3415,31 +4041,320 @@ class DouyinPageAdapter:
         return f"missing anchors: {', '.join(missing_anchors)}"
 
     def _collect_video_cards(self, limit: int) -> list[ProfileVideoCard]:
-        cards = []
+        cards: list[ProfileVideoCard] = []
+
+        # 1. 先尝试点击右侧面板的 “TA的作品” tab
+        try:
+            for selector in getattr(selectors, "PROFILE_WORKS_TAB_SELECTORS", []):
+                try:
+                    tab = self.page.locator(selector).first
+                    if tab.count() > 0 and tab.is_visible(timeout=500):
+                        tab.click(timeout=1000)
+
+                        # 等 TA 的作品区域加载，900ms 有时太短
+                        self.page.wait_for_timeout(1800)
+
+                        # 多次轻微滚动右侧作品区域，触发懒加载
+                        for scroll_index in range(3):
+                            try:
+                                self.page.mouse.wheel(0, 500)
+                                self.page.wait_for_timeout(700)
+                            except Exception:
+                                pass
+
+                        self.logger.info(
+                            "profile works tab clicked",
+                            extra={
+                                "selector": selector,
+                                "page_url": self.page.url,
+                                "page_title": self._safe_title(),
+                            },
+                        )
+                        break
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+        # 2. 原来的 selector 方式，保留
         for selector in selectors.PROFILE_VIDEO_CARD_SELECTORS:
             try:
                 locator = self.page.locator(selector)
                 count = locator.count()
+
+                self.logger.info(
+                    "profile video card selector probe",
+                    extra={
+                        "selector": selector,
+                        "count": count,
+                    },
+                )
+
                 if not count:
                     continue
+
                 for index in range(min(count, limit)):
                     item = locator.nth(index)
                     text = locator_text(item) or ""
-                    href = item.get_attribute("href") or first_attribute(item, selectors.VIDEO_LINK_SELECTORS, "href")
+
+                    href = (
+                        item.get_attribute("href")
+                        or first_attribute(item, selectors.VIDEO_LINK_SELECTORS, "href")
+                    )
                     href = _normalize_url(href)
+
+                    like_raw = (
+                        first_text(item, selectors.PROFILE_VIDEO_LIKE_SELECTORS)
+                        or _extract_profile_card_like_from_text(text)
+                        or _extract_metric(text, "点赞")
+                    )
+
+                    title = (
+                        first_text(item, selectors.PROFILE_VIDEO_TITLE_SELECTORS)
+                        or _extract_profile_card_title_from_text(text)
+                        or (text.splitlines()[0].strip() if text else None)
+                    )
+
                     cards.append(
                         ProfileVideoCard(
                             url=href,
-                            title=first_text(item, selectors.PROFILE_VIDEO_TITLE_SELECTORS) or text.splitlines()[0].strip() if text else None,
-                            like_raw=first_text(item, selectors.PROFILE_VIDEO_LIKE_SELECTORS) or _extract_metric(text, "点赞"),
+                            title=title,
+                            like_raw=like_raw,
                             is_pinned="置顶" in text,
                         )
                     )
+
                 if cards:
-                    return cards
-            except Exception:
+                    return cards[:limit]
+
+            except Exception as exc:
+                self.logger.info(
+                    "profile video card selector failed",
+                    extra={
+                        "selector": selector,
+                        "error": str(exc),
+                    },
+                )
                 continue
-        return cards
+
+        # 3. 如果 selector 全部失败，使用 DOM fallback 扫描右侧面板
+        fallback_items = []
+        try:
+            fallback_items = self.page.evaluate(
+                """
+                (limit) => {
+                    const clean = (value) => (value || "").replace(/\\s+/g, " ").trim();
+
+                    const likePattern = /^\\d+(?:\\.\\d+)?(?:万|亿|w|W|k|K)?$/;
+
+                    function visible(el) {
+                        if (!el) return false;
+                        const style = window.getComputedStyle(el);
+                        if (!style) return false;
+                        if (style.display === "none" || style.visibility === "hidden") return false;
+                        if (Number(style.opacity || "1") === 0) return false;
+
+                        const r = el.getBoundingClientRect();
+                        return r.width > 20 && r.height > 20 && r.right > 0 && r.bottom > 0;
+                    }
+
+                    function rectObj(el) {
+                        const r = el.getBoundingClientRect();
+                        return {
+                            left: Math.round(r.left),
+                            top: Math.round(r.top),
+                            width: Math.round(r.width),
+                            height: Math.round(r.height),
+                        };
+                    }
+
+                    function textOf(el) {
+                        return clean([
+                            el.innerText || "",
+                            el.textContent || "",
+                            el.getAttribute("aria-label") || "",
+                            el.getAttribute("title") || "",
+                        ].join(" "));
+                    }
+
+                    const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+
+                    // 优先找右侧包含 “TA的作品” 的面板
+                    const containers = Array.from(document.querySelectorAll("div, section, aside, main"))
+                        .filter((el) => {
+                            if (!visible(el)) return false;
+                            const r = el.getBoundingClientRect();
+                            const text = textOf(el);
+
+                            if (r.left < vw * 0.45) return false;
+                            if (r.width < 180 || r.height < 160) return false;
+
+                            return text.includes("TA的作品") || text.includes("详情");
+                        })
+                        .sort((a, b) => {
+                            const ar = a.getBoundingClientRect();
+                            const br = b.getBoundingClientRect();
+                            return (br.width * br.height) - (ar.width * ar.height);
+                        });
+
+                    const root = containers[0] || document.body;
+
+                    const nodes = Array.from(root.querySelectorAll("a, div, li, article"))
+                        .filter((el) => {
+                            if (!visible(el)) return false;
+
+                            const r = el.getBoundingClientRect();
+                            const text = textOf(el);
+
+                            if (r.left < vw * 0.45) return false;
+                            if (r.width < 70 || r.height < 45) return false;
+                            if (!text) return false;
+
+                            // 排除 tab、评论、相关推荐等明显不是作品卡片的区域
+                            if (/^(详情|TA的作品|评论|问AI|相关推荐|大家都在搜)/.test(text)) return false;
+                            if (text.includes("全部评论")) return false;
+                            if (text.includes("分享") && text.includes("回复")) return false;
+
+                            // 作品卡片一般会有数字点赞量
+                            return /\\d+(?:\\.\\d+)?(?:万|亿|w|W|k|K)?/.test(text);
+                        })
+                        .map((el) => {
+                            const text = textOf(el);
+                            const lines = text
+                                .split(/\\n|\\s{2,}/)
+                                .map(clean)
+                                .filter(Boolean);
+
+                            let href = null;
+                            if (el.matches && el.matches("a[href]")) {
+                                href = el.href || el.getAttribute("href");
+                            } else {
+                                const a = el.querySelector && el.querySelector("a[href]");
+                                if (a) href = a.href || a.getAttribute("href");
+                            }
+
+                            // 从所有短数字里找最像点赞量的一个
+                            const candidates = lines
+                                .flatMap((line) => line.split(/\\s+/).map(clean))
+                                .filter((part) => likePattern.test(part));
+
+                            const likeRaw = candidates.length ? candidates[candidates.length - 1] : null;
+
+                            const titleLine = lines.find((line) => {
+                                if (!line) return false;
+                                if (likePattern.test(line)) return false;
+                                if (line.includes("置顶")) return false;
+                                if (line.length > 80) return false;
+                                return true;
+                            }) || null;
+
+                            return {
+                                href,
+                                title: titleLine,
+                                like_raw: likeRaw,
+                                is_pinned: text.includes("置顶"),
+                                rect: rectObj(el),
+                                text_preview: text.slice(0, 120),
+                            };
+                        })
+                        .filter((item) => item.like_raw || item.title || item.href);
+
+                    // 简单去重：按位置 + 文本
+                    const seen = new Set();
+                    const results = [];
+
+                    for (const item of nodes) {
+                        const key = [
+                            item.href || "",
+                            item.like_raw || "",
+                            item.title || "",
+                            item.rect.left,
+                            item.rect.top,
+                        ].join("|");
+
+                        if (seen.has(key)) continue;
+                        seen.add(key);
+
+                        results.push(item);
+                        if (results.length >= limit) break;
+                    }
+
+                    return results;
+                }
+                """,
+                limit,
+            )
+        except Exception as exc:
+            self.logger.info(
+                "profile video card dom fallback failed",
+                extra={"error": str(exc)},
+            )
+            fallback_items = []
+
+        for item in fallback_items or []:
+            cards.append(
+                ProfileVideoCard(
+                    url=_normalize_url((item or {}).get("href")),
+                    title=(item or {}).get("title"),
+                    like_raw=(item or {}).get("like_raw"),
+                    is_pinned=bool((item or {}).get("is_pinned")),
+                )
+            )
+
+        self.logger.info(
+            "profile video card dom fallback result",
+            extra={
+                "fallback_count": len(cards),
+                "fallback_like_raws": [card.like_raw for card in cards],
+                "fallback_titles": [card.title for card in cards],
+            },
+        )
+
+        return cards[:limit]
+    
+    def _extract_profile_card_like_from_text(text: str | None) -> str | None:
+        if not text:
+            return None
+
+        parts = [
+            part.strip()
+            for part in re.split(r"[\s\n\r\t]+", text)
+            if part and part.strip()
+        ]
+
+        number_like_parts = [
+            part
+            for part in parts
+            if re.fullmatch(r"\d+(?:\.\d+)?(?:万|亿|w|W|k|K)?", part)
+        ]
+
+        if not number_like_parts:
+            return None
+
+        return number_like_parts[-1]
+
+
+    def _extract_profile_card_title_from_text(text: str | None) -> str | None:
+        if not text:
+            return None
+
+        lines = [
+            line.strip()
+            for line in re.split(r"[\n\r]+", text)
+            if line and line.strip()
+        ]
+
+        for line in lines:
+            if "置顶" in line:
+                continue
+            if re.fullmatch(r"\d+(?:\.\d+)?(?:万|亿|w|W|k|K)?", line):
+                continue
+            if line in {"TA的作品", "详情", "评论", "问AI", "相关推荐"}:
+                continue
+            if len(line) <= 80:
+                return line
+
+        return None
 
     def _looks_like_profile(self) -> bool:
         if "/user/" in (self.page.url or ""):
@@ -3867,6 +4782,7 @@ class DouyinPageAdapter:
 
     def _capture(self, label: str, full_page: bool = False) -> str | None:
         path = self.artifacts.screenshot_path(label)
+
         try:
             self.page.screenshot(
                 path=str(path),
@@ -3876,11 +4792,667 @@ class DouyinPageAdapter:
                 caret="hide",
             )
             return str(path)
+
+        except OSError as exc:
+            if getattr(exc, "errno", None) == 28:
+                self.logger.warning(
+                    "disk space is full; skip screenshot",
+                    extra={
+                        "label": label,
+                        "path": str(path),
+                        "error": str(exc),
+                    },
+                )
+                return None
+            raise
+
         except Exception as exc:
             self.logger.warning("Non-fatal screenshot failure for %s: %s", label, exc)
             return None
+        
+    #添加校验函数
+    def _validate_video_url_against_active_text(self, video_url: str | None, creator_name: str | None, active_text_summary: str | None, debug_label: str | None = None,) -> bool:
+        """Check whether a captured video_url really matches the current active feed item.
+
+        Network-captured video URLs can be stale or belong to preloaded/recommended videos.
+        This method opens the video URL in a temporary tab and checks whether the page text
+        contains the expected creator name and important words from the active feed text.
+        """
+        if not video_url:
+            return False
+
+        detail_page = None
+
+        try:
+            detail_page = self.page.context.new_page()
+            detail_page.goto(video_url, wait_until="domcontentloaded", timeout=45_000)
+            detail_page.wait_for_timeout(2_000)
+
+            try:
+                body_text = detail_page.locator("body").inner_text(timeout=5_000)
+            except Exception:
+                body_text = ""
+
+            body_text = " ".join(body_text.split())
+            active_text = " ".join((active_text_summary or "").split())
+
+            if not body_text:
+                return False
+
+            # 1. 作者名必须匹配。作者名不匹配，基本就是错的链接。
+            if creator_name and creator_name not in body_text:
+                self.logger.info(
+                    "network video_url rejected because creator does not match",
+                    extra={
+                        "video_url": video_url,
+                        "creator_name": creator_name,
+                        "debug_label": debug_label,
+                    },
+                )
+                return False
+
+            # 2. 从当前推荐流文本里抽几个关键词，要求单视频页至少命中一部分。
+            keywords = self._extract_validation_keywords(active_text)
+
+            if not keywords:
+                # 没有关键词时，只要作者名匹配就先接受。
+                return bool(creator_name and creator_name in body_text)
+
+            matched_keywords = [word for word in keywords if word in body_text]
+
+            # 至少命中 2 个关键词，或者关键词很少时命中 1 个。
+            required_matches = 1 if len(keywords) <= 2 else 2
+
+            is_valid = len(matched_keywords) >= required_matches
+
+            if not is_valid:
+                self.logger.info(
+                    "network video_url rejected because text does not match active card",
+                    extra={
+                        "video_url": video_url,
+                        "creator_name": creator_name,
+                        "keywords": keywords,
+                        "matched_keywords": matched_keywords,
+                        "debug_label": debug_label,
+                    },
+                )
+
+            return is_valid
+
+        except Exception as exc:
+            self.logger.info(
+                "network video_url validation failed",
+                extra={
+                    "video_url": video_url,
+                    "creator_name": creator_name,
+                    "debug_label": debug_label,
+                    "error": str(exc),
+                },
+            )
+            return False
+
+        finally:
+            if detail_page is not None:
+                try:
+                    detail_page.close()
+                except Exception:
+                    pass
+    #提炼验证关键词
+    def _extract_validation_keywords(self, text: str | None) -> list[str]:
+        """Extract useful keywords from active feed text for video URL validation."""
+        if not text:
+            return []
+
+        cleaned = " ".join(text.split())
+
+        noise_phrases = [
+            "发送",
+            "倍速",
+            "智能",
+            "清屏",
+            "连播",
+            "详情",
+            "TA的作品",
+            "评论",
+            "问AI",
+            "相关推荐",
+            "大家都在搜",
+            "全部评论",
+            "听抖音",
+            "认证徽章",
+            "分享",
+            "回复",
+            "展开",
+            "暂时没有更多评论",
+            "留下你的精彩评论吧",
+            "加载中",
+        ]
+
+        for phrase in noise_phrases:
+            cleaned = cleaned.replace(phrase, " ")
+
+        cleaned = re.sub(r"\d{1,2}:\d{2}\s*/\s*\d{1,2}:\d{2}", " ", cleaned)
+        cleaned = re.sub(r"https?://\S+", " ", cleaned)
+        cleaned = re.sub(r"[@#·，。！？、:：|｜()\[\]【】《》“”\"']", " ", cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+
+        words: list[str] = []
+
+        for token in cleaned.split():
+            token = token.strip()
+            if not token:
+                continue
+
+            if len(token) < 2:
+                continue
+
+            if token.replace(".", "").isdigit():
+                continue
+
+            if re.fullmatch(r"\d+(\.\d+)?[万亿wWkK]?", token):
+                continue
+
+            words.append(token)
+
+        return words[:8]
+    
+    #按 Escape 关闭评论面板/商品卡,  点击视频中间区域，让当前视频重新获得焦点,  如果页面里还有商品/评论遮挡，记录日志
+    def _prepare_feed_focus_before_homepage_open(
+    self,
+    debug_label: str | None = None,
+    ) -> None:
+        """Close comment/product overlays and refocus the active video before pressing F.
+
+        Shopping/product cards and comment panels can steal keyboard focus.
+        If focus stays inside those overlays, pressing F may not open the creator homepage.
+        """
+        # 1. 先尝试按 Escape，关闭评论面板、商品卡、弹层
+        for _ in range(3):
+            try:
+                self.page.keyboard.press("Escape")
+                self.page.wait_for_timeout(350)
+            except Exception:
+                pass
+
+        # 2. 再尝试点击视频中心区域，把焦点还给当前视频
+        try:
+            viewport = self.page.viewport_size or {"width": 1440, "height": 900}
+            x = int(viewport["width"] * 0.42)
+            y = int(viewport["height"] * 0.50)
+            self.page.mouse.click(x, y)
+            self.page.wait_for_timeout(500)
+        except Exception as exc:
+            self.logger.info(
+                "failed to refocus feed before homepage open",
+                extra={
+                    "debug_label": debug_label,
+                    "error": str(exc),
+                },
+            )
+
+        # 3. 如果页面里还有明显的商品/评论遮挡，再记录日志
+        try:
+            body_text = self.page.locator("body").inner_text(timeout=1500)
+        except Exception:
+            body_text = ""
+
+        overlay_hints = [
+            "视频同款",
+            "购物",
+            "选择",
+            "运费险",
+            "7天无理由",
+            "全部评论",
+            "留下你的精彩评论吧",
+        ]
+
+        if any(hint in body_text for hint in overlay_hints):
+            self.logger.info(
+                "feed may still contain product/comment overlay before F-key homepage open",
+                extra={
+                    "debug_label": debug_label,
+                    "overlay_hints": [hint for hint in overlay_hints if hint in body_text],
+                },
+            )
+            
+    def _copy_current_video_share_link(
+        self,
+        debug_label: str | None = None,
+    ) -> str | None:
+        """Copy the stable share link of the current active Douyin video.
+
+        This uses the UI share button + copy link button.
+        We grant clipboard permission before reading navigator.clipboard.readText(),
+        otherwise Chrome may raise Read permission denied.
+        """
+        try:
+            # 0. 先给当前 Douyin 页面授权剪贴板读取/写入权限
+            try:
+                self.page.context.grant_permissions(
+                    ["clipboard-read", "clipboard-write"],
+                    origin="https://www.douyin.com",
+                )
+            except Exception as exc:
+                self.logger.info(
+                    "failed to grant clipboard permissions",
+                    extra={
+                        "debug_label": debug_label,
+                        "error": str(exc),
+                    },
+                )
+
+            # 1. 先关闭评论面板、商品弹层、其他浮层，避免挡住分享按钮
+            for _ in range(2):
+                try:
+                    self.page.keyboard.press("Escape")
+                    self.page.wait_for_timeout(300)
+                except Exception:
+                    pass
+
+            # 2. 点击右侧分享按钮
+            clicked_share = self._click_current_video_share_button(debug_label=debug_label)
+
+            if not clicked_share:
+                self.logger.info(
+                    "share button not found; skip copying current video link",
+                    extra={
+                        "debug_label": debug_label,
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                    },
+                )
+                return None
+
+            self.page.wait_for_timeout(1500)
+
+            # 3. 如果 selector 找不到，使用较保守的右侧区域坐标兜底
+            # 注意：这个坐标可能需要根据你的屏幕微调。
+            if not clicked_share:
+                self.logger.info(
+                    "share button not found; skip copying current video link",
+                    extra={
+                        "debug_label": debug_label,
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                    },
+                )
+                return None
+
+            self.page.wait_for_timeout(1500)
+
+            # 4. 点击“复制链接”按钮
+            copy_button_candidates = [
+                'text=复制链接',
+                'text=复制口令',
+                'button:has-text("复制链接")',
+                'button:has-text("复制口令")',
+                'div[role="button"]:has-text("复制链接")',
+                'div[role="button"]:has-text("复制口令")',
+                'div:has-text("复制链接")',
+                'div:has-text("复制口令")',
+                '[aria-label*="复制"]',
+                '[title*="复制"]',
+            ]
+
+            clicked_copy = False
+
+            for selector in copy_button_candidates:
+                try:
+                    locator = self.page.locator(selector).first
+                    if locator.count() > 0 and locator.is_visible(timeout=1000):
+                        locator.click(timeout=2000)
+                        clicked_copy = True
+                        self.logger.info(
+                            "copy link button clicked",
+                            extra={
+                                "debug_label": debug_label,
+                                "selector": selector,
+                            },
+                        )
+                        break
+                except Exception:
+                    continue
+
+            if not clicked_copy:
+                try:
+                    share_panel_text = self.page.locator("body").inner_text(timeout=1500)
+                except Exception:
+                    share_panel_text = ""
+
+                self.logger.info(
+                    "copy link button not found after opening share panel",
+                    extra={
+                        "debug_label": debug_label,
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                        "share_panel_text": _summarize_text(share_panel_text, limit=500),
+                    },
+                )
+                return None
+
+            self.page.wait_for_timeout(800)
+
+            # 5. 读取剪贴板
+            try:
+                copied_text = self.page.evaluate("navigator.clipboard.readText()")
+            except Exception as exc:
+                self.logger.info(
+                    "failed to read clipboard after copy button clicked",
+                    extra={
+                        "debug_label": debug_label,
+                        "error": str(exc),
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                    },
+                )
+                return None
+
+            # 6. 从复制出来的文字里提取真正的 douyin 链接
+            match = re.search(r"https?://[^\s]+douyin\.com/[^\s]+", copied_text or "")
+            share_link = match.group(0).strip() if match else None
+
+            if not share_link:
+                self.logger.info(
+                    "copied text does not contain a douyin link",
+                    extra={
+                        "debug_label": debug_label,
+                        "copied_text": copied_text,
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                    },
+                )
+                return None
+
+            self.logger.info(
+                "current video share link copied",
+                extra={
+                    "debug_label": debug_label,
+                    "share_link": share_link,
+                },
+            )
+
+            return share_link
+
+        except Exception as exc:
+            self.logger.info(
+                "failed to copy current video share link",
+                extra={
+                    "debug_label": debug_label,
+                    "error": str(exc),
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                },
+            )
+            return None
+
+        finally:
+            # 7. 最后尝试关闭分享面板
+            try:
+                self.page.keyboard.press("Escape")
+                self.page.wait_for_timeout(300)
+            except Exception:
+                pass
+    
+    def _click_current_video_share_button( #点击分享按钮
+        self,
+        debug_label: str | None = None,
+    ) -> bool:
+        """Click the share button of the current visible feed video.
+
+        This avoids broad selectors like div:has-text("分享").
+        It searches only small clickable elements on the right side of the viewport.
+        """
+        try:
+            result = self.page.evaluate(
+                """
+                () => {
+                    const vw = window.innerWidth || document.documentElement.clientWidth;
+                    const vh = window.innerHeight || document.documentElement.clientHeight;
+
+                    function isVisible(el) {
+                        const style = window.getComputedStyle(el);
+                        if (!style) return false;
+                        if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+                            return false;
+                        }
+
+                        const rect = el.getBoundingClientRect();
+                        if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+
+                        const cx = rect.left + rect.width / 2;
+                        const cy = rect.top + rect.height / 2;
+
+                        if (cx < 0 || cx > vw || cy < 0 || cy > vh) return false;
+
+                        return true;
+                    }
+
+                    function textOf(el) {
+                        return [
+                            el.innerText || "",
+                            el.textContent || "",
+                            el.getAttribute("aria-label") || "",
+                            el.getAttribute("title") || "",
+                            el.getAttribute("data-e2e") || "",
+                            el.getAttribute("class") || "",
+                        ].join(" ");
+                    }
+
+                    function clickableParent(el) {
+                        let cur = el;
+                        for (let i = 0; i < 5 && cur; i++) {
+                            const tag = (cur.tagName || "").toLowerCase();
+                            const role = cur.getAttribute("role") || "";
+                            const onclick = cur.getAttribute("onclick") || "";
+                            const tabIndex = cur.getAttribute("tabindex");
+
+                            if (
+                                tag === "button" ||
+                                tag === "a" ||
+                                role === "button" ||
+                                onclick ||
+                                tabIndex !== null
+                            ) {
+                                return cur;
+                            }
+
+                            cur = cur.parentElement;
+                        }
+
+                        return el;
+                    }
+
+                    const rawElements = Array.from(
+                        document.querySelectorAll(
+                            'button, a, [role="button"], [aria-label], [title], [data-e2e], svg, path, div, span'
+                        )
+                    );
+
+                    const candidates = [];
+
+                    for (const raw of rawElements) {
+                        const el = clickableParent(raw);
+                        if (!el || !isVisible(el)) continue;
+
+                        const rect = el.getBoundingClientRect();
+
+                        // 只要右侧区域，避免点左侧导航/页脚
+                        if (rect.left < vw * 0.58) continue;
+
+                        // 排除顶部浏览器/导航附近、底部边缘
+                        if (rect.top < 80 || rect.bottom > vh - 20) continue;
+
+                        // 排除大块容器，只保留像按钮的小元素
+                        if (rect.width > 180 || rect.height > 180) continue;
+                        if (rect.width < 8 || rect.height < 8) continue;
+
+                        const text = textOf(el);
+                        const lower = text.toLowerCase();
+
+                        const looksLikeShare =
+                            text.includes("分享") ||
+                            text.includes("转发") ||
+                            lower.includes("share") ||
+                            lower.includes("forward");
+
+                        if (!looksLikeShare) continue;
+
+                        const cx = rect.left + rect.width / 2;
+                        const cy = rect.top + rect.height / 2;
+
+                        let score = 0;
+
+                        // 越靠右越像视频右侧按钮栏
+                        score += cx / vw * 100;
+
+                        // 不要太靠顶部，也不要太靠底部
+                        score -= Math.abs(cy - vh * 0.62) / 8;
+
+                        const tag = (el.tagName || "").toLowerCase();
+                        const role = el.getAttribute("role") || "";
+                        const dataE2E = el.getAttribute("data-e2e") || "";
+                        const ariaLabel = el.getAttribute("aria-label") || "";
+
+                        if (tag === "button") score += 30;
+                        if (role === "button") score += 25;
+                        if (dataE2E.includes("share")) score += 50;
+                        if (ariaLabel.includes("分享")) score += 50;
+                        if (text.trim() === "分享") score += 40;
+
+                        candidates.push({
+                            el,
+                            score,
+                            tag,
+                            role,
+                            dataE2E,
+                            ariaLabel,
+                            text: text.trim().slice(0, 80),
+                            rect: {
+                                left: Math.round(rect.left),
+                                top: Math.round(rect.top),
+                                width: Math.round(rect.width),
+                                height: Math.round(rect.height),
+                            },
+                        });
+                    }
+
+                    candidates.sort((a, b) => b.score - a.score);
+
+                    const debugCandidates = candidates.slice(0, 8).map(c => ({
+                        score: Math.round(c.score),
+                        tag: c.tag,
+                        role: c.role,
+                        dataE2E: c.dataE2E,
+                        ariaLabel: c.ariaLabel,
+                        text: c.text,
+                        rect: c.rect,
+                    }));
+
+                    if (candidates.length === 0) {
+                        return {
+                            clicked: false,
+                            reason: "no_share_candidate",
+                            candidates: debugCandidates,
+                        };
+                    }
+
+                    const best = candidates[0];
+                    best.el.click();
+
+                    return {
+                        clicked: true,
+                        reason: "clicked_best_share_candidate",
+                        best: {
+                            score: Math.round(best.score),
+                            tag: best.tag,
+                            role: best.role,
+                            dataE2E: best.dataE2E,
+                            ariaLabel: best.ariaLabel,
+                            text: best.text,
+                            rect: best.rect,
+                        },
+                        candidates: debugCandidates,
+                    };
+                }
+                """
+            )
+
+            if result.get("clicked"):
+                self.logger.info(
+                    "share button clicked by current-video candidate",
+                    extra={
+                        "debug_label": debug_label,
+                        "best": result.get("best"),
+                        "candidates": result.get("candidates"),
+                    },
+                )
+                return True
+
+            self.logger.info(
+                "share button not found by current-video candidate search",
+                extra={
+                    "debug_label": debug_label,
+                    "reason": result.get("reason"),
+                    "candidates": result.get("candidates"),
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                },
+            )
+            return False
+
+        except Exception as exc:
+            self.logger.info(
+                "failed to click current video share button",
+                extra={
+                    "debug_label": debug_label,
+                    "error": str(exc),
+                    "page_url": self.page.url,
+                    "page_title": self._safe_title(),
+                },
+            )
+            return False
+
+    def _open_creator_homepage_by_url(
+    self,
+    creator_profile_url: str | None,
+    debug_label: str | None = None,
+    ) -> PageStateSnapshot:
+        """Open creator homepage directly when F-key fails.
+
+        Product cards / shopping panels often steal focus, so pressing F may not
+        open the creator homepage. If we already know the creator profile URL,
+        direct navigation is safer.
+        """
+        if not creator_profile_url:
+            return self.classify_page_state(
+                debug_label=f"{debug_label}_direct_homepage_missing_url" if debug_label else "direct_homepage_missing_url",
+                capture=True,
+            )
+
+        self.logger.info(
+            "opening creator homepage by direct profile URL",
+            extra={
+                "creator_profile_url": creator_profile_url,
+                "page_url": self.page.url,
+                "page_title": self._safe_title(),
+                "debug_label": debug_label,
+            },
+        )
+
+        self.page.goto(
+            creator_profile_url,
+            wait_until="domcontentloaded",
+            timeout=45_000,
+        )
+        self.page.wait_for_timeout(2_000)
+
+        return self.classify_page_state(
+            debug_label=f"{debug_label}_homepage_direct_url" if debug_label else "homepage_direct_url",
+            capture=True,
+        )
 
 
+#DouyinPageAdapter class ends before this line
 def _extract_aweme_items(payload: dict | list) -> list[dict[str, str | None]]:
     items: list[dict[str, str | None]] = []
     for node in _walk_json_nodes(payload):
@@ -4664,6 +6236,86 @@ def _looks_like_global_page_chrome(text: str | None) -> bool:
         return True
     return False
 
+def _looks_like_commerce_feed_item(text: str | None) -> bool:
+    """Detect shopping/product-card feed items.
+
+    These items should be skipped because product cards can steal focus
+    and make creator/video data unreliable.
+    """
+    if not text:
+        return False
+
+    haystack = re.sub(r"\s+", " ", text).strip()
+
+    strong_hints = [
+        "购物 |",
+        "视频同款",
+        "商品橱窗",
+        "商品卡",
+        "查看详情",
+        "官方旗舰店",
+        "旗舰店",
+        "￥",
+        "¥",
+        "选择",
+        "运费险",
+        "7天无理由",
+        "极速退款",
+        "加入购物车",
+        "立即购买",
+        "领券",
+    ]
+
+    product_hints = [
+        "素颜霜",
+        "精华霜",
+        "淡印霜",
+        "护肤",
+        "遮瑕",
+        "粉底液",
+        "痘印",
+        "男士素颜霜",
+
+        # 新增：服装/穿搭商品词
+        "穿搭",
+        "polo衫",
+        "短袖",
+        "短袖t恤",
+        "t恤",
+        "男生穿搭",
+        "约会穿搭",
+        "谁穿谁好看",
+        "男装",
+        "衣服",
+        "上衣",
+    ]
+
+    # 非常明显的商品卡
+    if "购物 |" in haystack or "视频同款" in haystack:
+        return True
+
+    # 店铺型账号，基本直接跳过
+    if "官方旗舰店" in haystack or "旗舰店" in haystack:
+        return True
+
+    # 查看详情 + 商品词，通常是电商/商品内容
+    if "查看详情" in haystack and any(hint in haystack for hint in product_hints):
+        return True
+
+    strong_hit_count = sum(1 for hint in strong_hints if hint in haystack)
+    product_hit_count = sum(1 for hint in product_hints if hint in haystack)
+
+    if ("￥" in haystack or "¥" in haystack) and strong_hit_count >= 2:
+        return True
+
+    if product_hit_count >= 1 and strong_hit_count >= 2:
+        return True
+
+    # 穿搭类商品内容：多个商品词同时出现，也跳过
+    if product_hit_count >= 3 and any(token in haystack for token in ("穿搭", "短袖", "t恤", "polo衫")):
+        return True
+
+    return False
 
 def _looks_like_live_feed_item(
     text: str | None,

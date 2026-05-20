@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import csv
+import json
 import logging
 import sys
 import time
 from datetime import date
 from pathlib import Path
+from textwrap import shorten
 
 from search_agent.artifacts import ArtifactManager
 from search_agent.browser.session import BrowserSession
@@ -23,6 +26,500 @@ from search_agent.utils.trend import classify_traffic_trend
 from .content_analysis import ContentAnalysisWorkflow
 from .page import DouyinPageAdapter, FeedCandidateSnapshot, HomepageBrowseResult
 
+
+#添加污染检测函数
+POLLUTED_PAGE_HINTS = [
+    "开启读屏标签",
+    "读屏标签已关闭",
+    "下载抖音精选",
+    "京ICP备",
+    "京公网安备",
+    "广播电视节目制作经营许可证",
+    "增值电信业务经营许可证",
+    "网络文化经营许可证",
+    "互联网宗教信息服务许可证",
+    "用户服务协议",
+    "隐私政策",
+    "账号找回",
+    "联系我们",
+    "加入我们",
+    "营业执照",
+    "友情链接",
+    "站点地图",
+]
+
+
+def _looks_like_polluted_page_text(text: str | None) -> bool:
+    if not text:
+        return False
+
+    return any(hint in text for hint in POLLUTED_PAGE_HINTS)
+
+
+def _snapshot_is_polluted(snapshot) -> bool:
+    text_parts = [
+        getattr(snapshot, "raw_text", None),
+        getattr(snapshot, "description", None),
+        getattr(snapshot, "description_text", None),
+        getattr(snapshot, "expanded_description_text", None),
+        getattr(snapshot, "active_text_summary", None),
+    ]
+
+    combined_text = "\n".join(part for part in text_parts if part)
+
+    return _looks_like_polluted_page_text(combined_text)
+
+def _value(obj, *names, default=None):
+    """Safely read a value from dict/object using several possible field names."""
+    for name in names:
+        if isinstance(obj, dict):
+            value = obj.get(name)
+        else:
+            value = getattr(obj, name, None)
+
+        if value is not None and value != "":
+            return value
+
+    return default
+
+
+def _print_discovery_record_to_terminal(record, snapshot=None, homepage_result=None) -> None:
+    """Print one discovery record in a clear human-readable terminal block."""
+
+    record_id = _value(record, "record_id", "id", default="")
+    creator_name = _value(record, "creator_name", default="")
+    video_url = _value(record, "video_url", default=None)
+    video_url_capture_source = _value(record, "video_url_capture_source", default=None)
+
+    follower_count_raw = _value(
+        record,
+        "follower_count_raw",
+        "profile_follower_count_raw",
+        default=None,
+    )
+
+    total_liked_count_raw = _value(
+        record,
+        "total_liked_count_raw",
+        "profile_total_liked_count_raw",
+        default=None,
+    )
+
+    total_interaction_text = _value(record, "total_interaction_text", default=None)
+
+    description = _value(
+        record,
+        "description",
+        "description_text",
+        "expanded_description_text",
+        "active_text_summary",
+        default=None,
+    )
+
+    homepage_open_state = _value(record, "homepage_open_state", default=None)
+    homepage_close_state = _value(record, "homepage_close_state", default=None)
+    comment_collection_status = _value(record, "comment_collection_status", default=None)
+    comment_count = _value(record, "comment_count", default=None)
+
+    print("\n" + "=" * 90)
+    print("DISCOVERY RECORD SAVED")
+    print("=" * 90)
+    print(f"record_id: {record_id}")
+    print(f"creator_name: {creator_name}")
+    print("-" * 90)
+    print(f"profile_follower_count_raw: {follower_count_raw}")
+    print(f"profile_total_liked_count_raw: {total_liked_count_raw}")
+    print("-" * 90)
+    print(f"total_interaction_text: {total_interaction_text}")
+    print(f"video_url: {video_url}")
+    print(f"video_url_capture_source: {video_url_capture_source}")
+    print("-" * 90)
+    print(f"homepage_open_state: {homepage_open_state}")
+    print(f"homepage_close_state: {homepage_close_state}")
+    print(f"comment_collection_status: {comment_collection_status}")
+    print(f"comment_count: {comment_count}")
+    print("-" * 90)
+    print("description:")
+    print(description or "")
+    print("=" * 90 + "\n")
+
+# 在 helper 区域加表格函数
+def _short_text(value, width: int = 18) -> str:
+    """Shorten long text for terminal table display."""
+    if value is None:
+        return ""
+    text = str(value).replace("\n", " ").strip()
+    if not text:
+        return ""
+    return shorten(text, width=width, placeholder="...")
+
+
+def _table_value(record, *names, default=""):
+    """Read one value from record using possible field names."""
+    for name in names:
+        value = getattr(record, name, None)
+        if value is not None and value != "":
+            return value
+    return default
+
+
+def _print_discovery_records_table(records: list) -> None:
+    """Print all saved discovery records from this run as a readable terminal table."""
+    if not records:
+        print("\nNo discovery records saved in this run.\n")
+        return
+
+    headers = [
+        "No",
+        "达人",
+        "粉丝",
+        "获赞",
+        "视频互动",
+        "视频链接",
+        "评论状态",
+        "record_id",
+    ]
+
+    rows = []
+
+    for index, record in enumerate(records, start=1):
+        video_url = _table_value(record, "video_url", default="")
+        video_url_status = "yes" if video_url else "no"
+
+        rows.append(
+            [
+                str(index),
+                _short_text(_table_value(record, "creator_name"), 14),
+                _short_text(_table_value(record, "follower_count_raw"), 10),
+                _short_text(_table_value(record, "total_liked_count_raw"), 10),
+                _short_text(_table_value(record, "total_interaction_text"), 18),
+                video_url_status,
+                _short_text(_table_value(record, "comment_collection_status"), 18),
+                _short_text(_table_value(record, "record_id"), 28),
+            ]
+        )
+
+    widths = []
+    for col_index, header in enumerate(headers):
+        max_width = len(header)
+        for row in rows:
+            max_width = max(max_width, len(row[col_index]))
+        widths.append(max_width)
+
+    def border(left: str, middle: str, right: str) -> str:
+        return left + middle.join("─" * (width + 2) for width in widths) + right
+
+    def row_line(values: list[str]) -> str:
+        cells = []
+        for value, width in zip(values, widths):
+            cells.append(f" {value:<{width}} ")
+        return "│" + "│".join(cells) + "│"
+
+    print("\n" + border("┌", "┬", "┐"))
+    print(row_line(headers))
+    print(border("├", "┼", "┤"))
+
+    for row in rows:
+        print(row_line(row))
+
+    print(border("└", "┴", "┘") + "\n")
+def _export_discovery_records_csv(records: list, output_path: Path) -> None:
+    fieldnames = [
+        "record_id", "creator_name", "profile_follower_count_raw",
+        "profile_total_liked_count_raw", "like_count_raw",
+        "comment_count_raw", "share_count_raw", "favorite_count_raw",
+        "homepage_screenshot_path"
+    ]
+
+    for i in range(1, 16):
+        fieldnames.append(f"recent_{i:02d}_like_count")
+
+    fieldnames.extend(["video_url", "video_url_capture_source", "comment_collection_status", "description"])
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open("w", encoding="utf-8-sig", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+
+        for record in records:
+            notes = getattr(record, "notes", "") or ""
+
+            homepage_screenshot_path = ""
+            recent_works = []
+
+            for part in notes.split("；"):
+                if part.startswith("homepage_screenshot="):
+                    homepage_screenshot_path = part.replace("homepage_screenshot=", "", 1)
+
+                elif part.startswith("profile_recent_works_json="):
+                    raw_json = part.replace("profile_recent_works_json=", "", 1)
+                    try:
+                        parsed = json.loads(raw_json)
+                        if isinstance(parsed, list):
+                            recent_works = parsed[:15]
+                    except Exception:
+                        recent_works = []
+
+            row = {
+                "record_id": getattr(record, "record_id", ""),
+                "creator_name": getattr(record, "creator_name", ""),
+                "profile_follower_count_raw": getattr(record, "follower_count_raw", ""),
+                "profile_total_liked_count_raw": getattr(record, "total_liked_count_raw", ""),
+                "like_count_raw": getattr(record, "like_count_raw", ""),
+                "comment_count_raw": getattr(record, "comment_count_raw", ""),
+                "share_count_raw": getattr(record, "share_count_raw", ""),
+                "favorite_count_raw": getattr(record, "favorite_count_raw", ""),
+                "homepage_screenshot_path": homepage_screenshot_path,
+                "video_url": getattr(record, "video_url", ""),
+                "video_url_capture_source": getattr(record, "video_url_capture_source", ""),
+                "comment_collection_status": getattr(record, "comment_collection_status", ""),
+                "description": getattr(record, "active_text_summary", "")
+                or getattr(record, "expanded_description_text", "")
+                or getattr(record, "video_description_raw", ""),
+            }
+
+            for i in range(1, 16):
+                prefix = f"recent_{i:02d}"
+                item = recent_works[i - 1] if i - 1 < len(recent_works) else {}
+
+                row[f"{prefix}_like_count"] = item.get("like_count", "") if isinstance(item, dict) else ""
+   
+
+            writer.writerow(row)
+
+def _cycle_looks_like_feed_shell_stuck(cycle) -> bool:
+    """Detect when Douyin is stuck on /jingxuan shell instead of a real active video."""
+    feed_snapshot = getattr(cycle, "feed_snapshot", None)
+
+    page_url = (
+        getattr(feed_snapshot, "page_url", None)
+        or getattr(cycle, "page_url", None)
+        or ""
+    )
+
+    page_title = (
+        getattr(feed_snapshot, "page_title", None)
+        or getattr(cycle, "page_title", None)
+        or ""
+    )
+
+    creator_name = (
+        getattr(feed_snapshot, "creator_name", None)
+        or getattr(cycle, "creator_name", None)
+    )
+
+    video_url = (
+        getattr(feed_snapshot, "video_url", None)
+        or getattr(cycle, "video_url", None)
+    )
+
+    active_text = (
+        getattr(feed_snapshot, "active_text_summary", None)
+        or getattr(feed_snapshot, "feed_identity", None)
+        or getattr(cycle, "active_text_summary", None)
+        or getattr(cycle, "feed_identity", None)
+        or ""
+    )
+
+    homepage_open_state = getattr(cycle, "homepage_open_state", None)
+
+    footer_hints = [
+        "开启读屏标签",
+        "读屏标签已关闭",
+        "下载 APP",
+        "京ICP备",
+        "京公网安备",
+        "用户服务协议",
+        "隐私政策",
+        "站点地图",
+    ]
+
+    has_footer_text = any(hint in active_text for hint in footer_hints)
+
+    is_jingxuan_shell = (
+        "douyin.com/jingxuan" in page_url
+        or "抖音精选电脑版" in page_title
+    )
+
+    missing_real_video = not creator_name and not video_url
+
+    f_key_failed = homepage_open_state in {
+        "f_no_effect_skipped",
+        "no_author_link",
+        "homepage_open_failed",
+        None,
+    }
+
+    return is_jingxuan_shell and missing_real_video and has_footer_text and f_key_failed
+
+
+def _force_reset_recommend_feed_from_shell(adapter, debug_label: str, logger=None) -> bool:
+    """Hard reset Douyin from /jingxuan shell back to a real recommend feed."""
+    page = getattr(adapter, "page", None)
+    if page is None:
+        return False
+
+    def _safe_log(message: str, **extra):
+        if logger:
+            logger.warning(
+                message,
+                extra={
+                    "debug_label": debug_label,
+                    **extra,
+                },
+            )
+
+    def _looks_like_shell_page() -> bool:
+        try:
+            current_url = page.url or ""
+        except Exception:
+            current_url = ""
+
+        try:
+            title = page.title() or ""
+        except Exception:
+            title = ""
+
+        try:
+            body_text = page.locator("body").inner_text(timeout=1200)
+        except Exception:
+            body_text = ""
+
+        footer_hints = [
+            "开启读屏标签",
+            "读屏标签已关闭",
+            "下载抖音精选",
+            "京ICP备",
+            "京公网安备",
+            "用户服务协议",
+            "隐私政策",
+            "站点地图",
+        ]
+
+        video_hints = [
+            "@",
+            "听抖音",
+            "倍速",
+            "清屏",
+            "连播",
+            "评论",
+            "分享",
+        ]
+
+        has_footer = any(hint in body_text for hint in footer_hints)
+        has_video = any(hint in body_text for hint in video_hints)
+
+        return (
+            "douyin.com/jingxuan" in current_url
+            or "抖音精选电脑版" in title
+            or (has_footer and not has_video)
+        )
+
+    # 第 1 层：先尝试关闭弹窗/评论面板/浮层
+    for key in ["Escape", "Escape", "ArrowDown"]:
+        try:
+            page.keyboard.press(key)
+            page.wait_for_timeout(500)
+        except Exception:
+            pass
+
+    # 第 2 层：普通跳转回推荐页
+    try:
+        page.goto(
+            "https://www.douyin.com/?recommend=1&from_nav=1",
+            wait_until="domcontentloaded",
+            timeout=20000,
+        )
+        page.wait_for_timeout(3500)
+    except Exception as exc:
+        _safe_log(
+            "failed to goto recommend feed during shell reset",
+            error=str(exc),
+        )
+
+    # 尝试用键盘/滚轮激活视频流
+    for _ in range(4):
+        try:
+            page.keyboard.press("ArrowDown")
+            page.wait_for_timeout(700)
+        except Exception:
+            pass
+
+    for _ in range(3):
+        try:
+            page.mouse.wheel(0, 1000)
+            page.wait_for_timeout(700)
+        except Exception:
+            pass
+
+    # 如果已经离开 /jingxuan，就成功
+    if not _looks_like_shell_page():
+        _safe_log(
+            "recommend feed hard reset from shell completed",
+            recovered=True,
+            page_url=page.url,
+            page_title=page.title(),
+        )
+        return True
+
+    # 第 3 层：普通跳转无效，强制从主页重新进入推荐
+    _safe_log(
+        "normal shell reset still stuck on jingxuan; trying stronger reset",
+        page_url=page.url,
+        page_title=page.title(),
+    )
+
+    try:
+        page.goto(
+            "https://www.douyin.com/",
+            wait_until="domcontentloaded",
+            timeout=20000,
+        )
+        page.wait_for_timeout(3500)
+    except Exception as exc:
+        _safe_log(
+            "failed to goto douyin home during stronger shell reset",
+            error=str(exc),
+        )
+
+    # 尝试点击“推荐”
+    recommend_texts = ["推荐", "首页", "精选"]
+    for text in recommend_texts:
+        try:
+            locator = page.get_by_text(text, exact=True)
+            if locator.count() > 0:
+                locator.first.click(timeout=2000)
+                page.wait_for_timeout(2500)
+                break
+        except Exception:
+            pass
+
+    # 再尝试键盘激活
+    for _ in range(5):
+        try:
+            page.keyboard.press("ArrowDown")
+            page.wait_for_timeout(800)
+        except Exception:
+            pass
+
+    for _ in range(3):
+        try:
+            page.mouse.wheel(0, 1200)
+            page.wait_for_timeout(800)
+        except Exception:
+            pass
+
+    recovered = not _looks_like_shell_page()
+
+    _safe_log(
+        "recommend feed hard reset from shell completed",
+        recovered=recovered,
+        page_url=page.url,
+        page_title=page.title(),
+    )
+
+    return recovered
 
 class CreatorDiscoveryWorkflow:
     REPEATED_UNKNOWN_LIMIT = 3
@@ -93,10 +590,24 @@ class CreatorDiscoveryWorkflow:
         processed = qualified = skipped = blocked = 0
         observation_count = 0
         records_for_analysis: set[str] = set()
+        saved_records_for_table: list[CreatorDiscoveryRecord] = []
+        seen_creator_names_this_run: set[str] = set()
+        seen_record_ids_this_run: set[str] = set()
+        feed_shell_streak = 0
         start_time = time.monotonic()
         stalled_feed_streak = 0
+
+        # 防止遇到直播间时 live_room_streak / last_live_room_url 未定义
+        live_room_streak = 0
+        last_live_room_url = None
+
         session_path = self._session_path()
         deadline = self._deadline_at(start_time)
+
+        def _time_limit_reached() -> bool:
+            if self.run_config.max_minutes <= 0:
+                return False
+            return (time.monotonic() - start_time) / 60 >= self.run_config.max_minutes
 
         with BrowserSession(self.browser_config, session_path) as browser:
             self._log_session_state(browser, session_path, mode="creator-discovery")
@@ -129,36 +640,370 @@ class CreatorDiscoveryWorkflow:
                 observation_count += 1
                 processed += 1
                 debug_label = f"{observation_count:03d}"
-                cycle = self._browse_cycle_with_resume(
-                    adapter=adapter,
-                    observation_index=observation_count,
-                    debug_label=debug_label,
-                    deadline=deadline,
-                )
-                self._log_browse_cycle(cycle)
-                minimal_record = self._build_discovery_record(cycle)
-                duplicate_decision = (
-                    decide_duplicate(minimal_record, existing_records)
-                    if self._should_check_duplicate(minimal_record)
-                    else None
-                )
-                if duplicate_decision and duplicate_decision.is_duplicate and not duplicate_decision.requires_manual_review:
-                    skipped += 1
-                    self.logger.info(
-                        "discovery record skipped as duplicate",
-                        extra={
-                            "record_id": minimal_record.record_id,
-                            "matched_record_id": duplicate_decision.matched_record_id,
-                            "reason": duplicate_decision.reason,
-                        },
-                    )
-                else:
-                    content_snapshot = self._collect_content_snapshot_with_resume(
+                try:
+                    cycle = self._browse_cycle_with_resume(
                         adapter=adapter,
-                        candidate=cycle.feed_snapshot,
+                        observation_index=observation_count,
                         debug_label=debug_label,
                         deadline=deadline,
                     )
+                except SearchAgentError as exc:
+                    if "Captcha detected and still present after one refresh" in str(exc):
+                        self.logger.warning(
+                            "captcha blocked run; finishing gracefully and exporting csv",
+                            extra={
+                                "observation_index": observation_count,
+                                "successful_records": qualified,
+                                "skipped_items": skipped,
+                                "error": str(exc),
+                            },
+                        )
+                        break
+                    raise
+                self._log_browse_cycle(cycle)
+
+                if _time_limit_reached():
+                    self.logger.info(
+                        "max_minutes reached after browse cycle; finishing gracefully",
+                        extra={
+                            "observation_index": observation_count,
+                            "successful_records": qualified,
+                            "skipped_items": skipped,
+                            "max_minutes": self.run_config.max_minutes,
+                        },
+                    )
+                    break
+
+                if _cycle_looks_like_feed_shell_stuck(cycle):
+                    skipped += 1
+                    feed_shell_streak += 1
+
+                    self.logger.warning(
+                        "recommend feed shell stuck detected; skip snapshot and hard reset feed",
+                        extra={
+                            "observation_index": observation_count,
+                            "feed_shell_streak": feed_shell_streak,
+                            "page_url": getattr(adapter.page, "url", None),
+                            "page_title": adapter._safe_title(),
+                            "feed_identity": getattr(cycle.feed_snapshot, "feed_identity", None),
+                            "creator_name": getattr(cycle.feed_snapshot, "creator_name", None),
+                            "video_url": getattr(cycle.feed_snapshot, "video_url", None),
+                            "homepage_open_state": getattr(cycle, "homepage_open_state", None),
+                        },
+                    )
+
+                    try:
+                        recovered = _force_reset_recommend_feed_from_shell(
+                            adapter=adapter,
+                            debug_label=f"{debug_label}_feed_shell_stuck_{feed_shell_streak}",
+                            logger=self.logger,
+                        )
+
+                        if not recovered and feed_shell_streak >= 3:
+                            self.logger.error(
+                                "recommend feed shell recovery failed repeatedly; stop run early",
+                                extra={
+                                    "observation_index": observation_count,
+                                    "feed_shell_streak": feed_shell_streak,
+                                    "page_url": getattr(adapter.page, "url", None),
+                                    "page_title": adapter._safe_title(),
+                                },
+                            )
+                            break
+                    except Exception as exc:
+                        self.logger.warning(
+                            "feed shell hard reset failed",
+                            extra={
+                                "observation_index": observation_count,
+                                "feed_shell_streak": feed_shell_streak,
+                                "error": str(exc),
+                            },
+                        )
+
+                    continue
+                else:
+                    feed_shell_streak = 0
+                # 这里放直播保护
+                current_page_url = adapter.page.url or ""
+
+                if "/root/live/" in current_page_url:
+                    skipped += 1
+
+                    if last_live_room_url == current_page_url:
+                        live_room_streak += 1
+                    else:
+                        live_room_streak = 1
+                        last_live_room_url = current_page_url
+
+                    self.logger.warning(
+                        "live room url detected after browse cycle; recover and force skip current area",
+                        extra={
+                            "observation_index": observation_count,
+                            "live_room_streak": live_room_streak,
+                            "page_url": current_page_url,
+                            "page_title": adapter._safe_title(),
+                            "feed_identity": cycle.feed_snapshot.feed_identity,
+                            "creator_name": cycle.feed_snapshot.creator_name,
+                        },
+                    )
+
+                    try:
+                        adapter._recover_recommend_feed_if_polluted(
+                            debug_label=f"{debug_label}_live_room_after_browse"
+                        )
+                    except Exception:
+                        pass
+
+                    # 重点：如果同一个直播连续出现，就不要只翻 1 条，直接多翻几条
+                    force_skip_count = 3 if live_room_streak >= 2 else 1
+
+                    for skip_index in range(force_skip_count):
+                        try:
+                            movement = self._run_with_interactive_pause(
+                                adapter=adapter,
+                                operation=lambda: adapter.advance_feed(
+                                    cycle.feed_snapshot,
+                                    debug_label=f"{debug_label}_post_live_recover_{skip_index + 1}",
+                                ),
+                                context=f"feed-scroll-live-recover:{debug_label}:{skip_index + 1}",
+                                deadline=deadline,
+                            )
+                            self._log_feed_progression(movement, observation_count)
+                        except Exception as exc:
+                            self.logger.warning(
+                                "failed to force skip after live room",
+                                extra={
+                                    "observation_index": observation_count,
+                                    "skip_index": skip_index + 1,
+                                    "error": str(exc),
+                                },
+                            )
+                            break
+
+                        try:
+                            if "/root/live/" not in (adapter.page.url or ""):
+                                # 给页面一点时间稳定
+                                adapter.page.wait_for_timeout(600)
+                        except Exception:
+                            pass
+
+                    continue
+                else:
+                    live_room_streak = 0
+                    last_live_room_url = None
+
+                # 新增：直播内容和商品卡视频直接跳过，不保存 discovery record，不抓评论，不进 content analysis queue
+                if (cycle.feed_snapshot.is_live or cycle.homepage_open_state in {"live_skipped", "commerce_skipped"}):
+                    skipped += 1
+                    skip_reason = (
+                        "commerce"
+                        if cycle.homepage_open_state == "commerce_skipped"
+                        else "live"
+                    )
+
+                    skip_message = (
+                        "commerce feed item skipped before content snapshot"
+                        if skip_reason == "commerce"
+                        else "live feed item skipped before content snapshot"
+                    )
+
+                    self.logger.info(
+                        skip_message,
+                        extra={
+                            "observation_index": cycle.observation_index,
+                            "creator_name": cycle.feed_snapshot.creator_name,
+                            "feed_identity": cycle.feed_snapshot.feed_identity,
+                            "active_text_summary": cycle.feed_snapshot.active_text_summary,
+                            "homepage_open_state": cycle.homepage_open_state,
+                            "homepage_close_state": cycle.homepage_close_state,
+                            "skip_reason": skip_reason,
+                        },
+                    )
+
+                    self.logger.info(
+                        "scrolling to next video",
+                        extra={
+                            "observation_index": observation_count,
+                            "feed_identity": cycle.feed_snapshot.feed_identity,
+                            "page_url": cycle.feed_snapshot.page_url,
+                            "page_title": cycle.feed_snapshot.page_title,
+                        },
+                    )
+
+                    movement = self._run_with_interactive_pause(
+                        adapter=adapter,
+                        operation=lambda: adapter.advance_feed(cycle.feed_snapshot, debug_label=f"{debug_label}_post"),
+                        context=f"feed-scroll:{debug_label}",
+                        deadline=deadline,
+                    )
+                    self._log_feed_progression(movement, observation_count)
+
+                    if movement.changed:
+                        stalled_feed_streak = 0
+                        live_room_streak = 0
+                        last_live_room_url = None
+                        continue
+
+                    stalled_feed_streak += 1
+                    if stalled_feed_streak >= self.STALLED_FEED_LIMIT:
+                        exc = self._build_feed_debug_exception(
+                            cycle.feed_snapshot,
+                            message="跳过直播内容后滚动未进入下一条视频，当前推荐流停滞。",
+                            movement=movement,
+                        )
+                        if self._handle_resumable_pause(adapter, exc, context="stalled-feed-after-live-skip", deadline=deadline):
+                            stalled_feed_streak = 0
+                            continue
+                        raise exc
+
+                    continue
+
+                minimal_record = self._build_discovery_record(cycle)
+
+                minimal_creator_key = (minimal_record.creator_name or "").strip().lower()
+                minimal_record_key = (minimal_record.record_id or "").strip().lower()
+
+                is_duplicate_this_run = False
+                duplicate_reason = None
+
+                if minimal_creator_key and minimal_creator_key in seen_creator_names_this_run:
+                    is_duplicate_this_run = True
+                    duplicate_reason = "本轮重复达人"
+
+                if minimal_record_key and minimal_record_key in seen_record_ids_this_run:
+                    is_duplicate_this_run = True
+                    duplicate_reason = "本轮重复 record_id"
+
+                if is_duplicate_this_run:
+                    skipped += 1
+                    self.logger.info(
+                        "discovery record skipped as duplicate in current run",
+                        extra={
+                            "record_id": minimal_record.record_id,
+                            "creator_name": minimal_record.creator_name,
+                            "reason": duplicate_reason,
+                        },
+                    )
+                else:
+                    if _time_limit_reached():
+                        self.logger.info(
+                            "max_minutes reached before content snapshot; finishing gracefully",
+                            extra={
+                                "observation_index": observation_count,
+                                "successful_records": qualified,
+                                "skipped_items": skipped,
+                                "max_minutes": self.run_config.max_minutes,
+                            },
+                        )
+                        break
+
+                    try:
+                        content_snapshot = self._collect_content_snapshot_with_resume(
+                            adapter=adapter,
+                            candidate=cycle.feed_snapshot,
+                            debug_label=debug_label,
+                            deadline=deadline,
+                        )
+                    except OSError as exc:
+                        if getattr(exc, "errno", None) == 28:
+                            skipped += 1
+                            self.logger.warning(
+                                "disk space is full during content snapshot; skip current record",
+                                extra={
+                                    "observation_index": observation_count,
+                                    "debug_label": debug_label,
+                                    "error": str(exc),
+                                },
+                            )
+                            continue
+                        raise
+                    except Exception as exc:
+                        skipped += 1
+                        self.logger.warning(
+                            "content snapshot failed; skip current record",
+                            extra={
+                                "observation_index": observation_count,
+                                "debug_label": debug_label,
+                                "error": str(exc),
+                            },
+                        )
+                        continue
+
+                    if _snapshot_is_polluted(content_snapshot):
+                        skipped += 1
+                        self.logger.warning(
+                            "polluted page snapshot skipped before saving record",
+                            extra={
+                                "observation_index": observation_count,
+                                "creator_name": getattr(content_snapshot, "creator_name", None),
+                                "video_url": getattr(content_snapshot, "video_url", None),
+                                "video_url_capture_source": getattr(content_snapshot, "video_url_capture_source", None),
+                                "active_text_summary": getattr(content_snapshot, "active_text_summary", None),
+                                "expanded_description_text": getattr(content_snapshot, "expanded_description_text", None),
+                                "page_url": getattr(content_snapshot, "page_url", None),
+                                "page_title": getattr(content_snapshot, "page_title", None),
+                            },
+                        )
+
+                        try:
+                            adapter._recover_recommend_feed_if_polluted(
+                                debug_label=f"{debug_label}_polluted_before_save"
+                            )
+                        except Exception:
+                            pass
+
+                        continue
+
+                    if (
+                        not getattr(content_snapshot, "video_url", None)
+                        and getattr(content_snapshot, "comment_collection_status", None) == "panel_open_failed"
+                    ):
+                        skipped += 1
+                        self.logger.warning(
+                            "snapshot skipped because video_url missing and comment panel failed; force advance feed",
+                            extra={
+                                "observation_index": observation_count,
+                                "creator_name": getattr(content_snapshot, "creator_name", None),
+                                "comment_collection_status": getattr(content_snapshot, "comment_collection_status", None),
+                                "active_text_summary": getattr(content_snapshot, "active_text_summary", None),
+                            },
+                        )
+
+                        try:
+                            movement = self._run_with_interactive_pause(
+                                adapter=adapter,
+                                operation=lambda: adapter.advance_feed(
+                                    content_snapshot,
+                                    debug_label=f"{debug_label}_post_missing_url_panel_failed",
+                                ),
+                                context=f"feed-scroll-missing-url-panel-failed:{debug_label}",
+                                deadline=deadline,
+                            )
+                            self._log_feed_progression(movement, observation_count)
+
+                            if not movement.changed:
+                                self.logger.warning(
+                                    "force advance after missing video_url failed",
+                                    extra={
+                                        "observation_index": observation_count,
+                                        "creator_name": getattr(content_snapshot, "creator_name", None),
+                                        "debug_label": debug_label,
+                                        "page_url": getattr(adapter.page, "url", None),
+                                        "page_title": adapter._safe_title(),
+                                    },
+                                )
+                        except Exception as exc:
+                            self.logger.warning(
+                                "failed to force advance after missing video_url and panel_open_failed",
+                                extra={
+                                    "observation_index": observation_count,
+                                    "creator_name": getattr(content_snapshot, "creator_name", None),
+                                    "error": str(exc),
+                                },
+                            )
+
+                        continue
+
                     final_cycle = HomepageBrowseResult(
                         observation_index=cycle.observation_index,
                         feed_snapshot=content_snapshot,
@@ -169,13 +1014,43 @@ class CreatorDiscoveryWorkflow:
                         homepage_open_state=cycle.homepage_open_state,
                         homepage_close_state=cycle.homepage_close_state,
                     )
+
                     record = self._build_discovery_record(final_cycle)
-                    self.discovery_store.append(record)
+
+                    record_creator_key = (record.creator_name or "").strip().lower()
+                    record_key = (record.record_id or "").strip().lower()
+
+                    try:
+                        self.discovery_store.append(record)
+                    except OSError as exc:
+                        if getattr(exc, "errno", None) == 28:
+                            skipped += 1
+                            self.logger.warning(
+                                "disk space is full while saving discovery record; skip current record",
+                                extra={
+                                    "record_id": record.record_id,
+                                    "creator_name": record.creator_name,
+                                    "error": str(exc),
+                                },
+                            )
+                            continue
+                        raise
+
                     existing_records.append(record)
+                    saved_records_for_table.append(record)
+
+                    if record_creator_key:
+                        seen_creator_names_this_run.add(record_creator_key)
+
+                    if record_key:
+                        seen_record_ids_this_run.add(record_key)
+
                     if self.run_config.content_analysis_enabled:
                         self.analysis_queue_store.enqueue(record)
                         records_for_analysis.add(record.record_id)
                     qualified += 1
+                    _print_discovery_record_to_terminal(record)
+
                     self.logger.info(
                         "discovery record saved",
                         extra={
@@ -189,6 +1064,18 @@ class CreatorDiscoveryWorkflow:
                         },
                     )
 
+                    if _time_limit_reached():
+                        self.logger.info(
+                            "max_minutes reached after saving record; finishing gracefully",
+                            extra={
+                                "observation_index": observation_count,
+                                "successful_records": qualified,
+                                "skipped_items": skipped,
+                                "max_minutes": self.run_config.max_minutes,
+                            },
+                        )
+                        break
+
                 self.logger.info(
                     "scrolling to next video",
                     extra={
@@ -198,13 +1085,36 @@ class CreatorDiscoveryWorkflow:
                         "page_title": cycle.feed_snapshot.page_title,
                     },
                 )
-                movement = self._run_with_interactive_pause(
-                    adapter=adapter,
-                    operation=lambda: adapter.advance_feed(cycle.feed_snapshot, debug_label=f"{debug_label}_post"),
-                    context=f"feed-scroll:{debug_label}",
-                    deadline=deadline,
-                )
-                self._log_feed_progression(movement, observation_count)
+
+                try:
+                    adapter._recover_recommend_feed_if_polluted(
+                        debug_label=f"{debug_label}_before_scroll"
+                    )
+                except Exception:
+                    pass
+
+                try:
+                    movement = self._run_with_interactive_pause(
+                        adapter=adapter,
+                        operation=lambda: adapter.advance_feed(cycle.feed_snapshot, debug_label=f"{debug_label}_post"),
+                        context=f"feed-scroll:{debug_label}",
+                        deadline=deadline,
+                    )
+                    self._log_feed_progression(movement, observation_count)
+
+                except SearchAgentError as exc:
+                    if "Douyin workflow timed out while waiting for manual recovery" in str(exc):
+                        self.logger.info(
+                            "workflow deadline reached after saving record; finishing gracefully",
+                            extra={
+                                "observation_index": observation_count,
+                                "successful_records": qualified,
+                                "skipped_items": skipped,
+                                "context": f"feed-scroll:{debug_label}",
+                            },
+                        )
+                        break
+                    raise
                 if movement.changed:
                     stalled_feed_streak = 0
                     continue
@@ -246,6 +1156,22 @@ class CreatorDiscoveryWorkflow:
             )
 
         duration_minutes = round((time.monotonic() - start_time) / 60, 2)
+        _print_discovery_records_table(saved_records_for_table)
+
+        summary_csv_path = self.paths.discovery_output.with_name(
+            f"discovery_summary_{self.artifacts.run_id}.csv"
+        )
+
+        _export_discovery_records_csv(saved_records_for_table, summary_csv_path)
+
+        self.logger.info(
+            "discovery csv summary exported",
+            extra={
+                "csv_path": str(summary_csv_path),
+                "record_count": len(saved_records_for_table),
+            },
+        )
+
         return RunSummary(
             stage=WorkflowStage.CREATOR_DISCOVERY,
             run_id=self.artifacts.run_id,
@@ -258,7 +1184,6 @@ class CreatorDiscoveryWorkflow:
             output_path=str(self.paths.discovery_output),
             queue_path=str(self.paths.analysis_queue_output),
         )
-
     @staticmethod
     def _screen_candidate(candidate: FeedCandidateSnapshot) -> str | None:
         if candidate.is_ad:
@@ -409,6 +1334,71 @@ class CreatorDiscoveryWorkflow:
                     )
                 return result
             except BlockingStateError as exc:
+                if getattr(exc, "page_state", None) == "captcha_blocked":
+                    self.logger.warning(
+                        "captcha detected; try one safe refresh back to recommend feed",
+                        extra={
+                            "context": context,
+                            "page_state": exc.page_state,
+                            "message": exc.message,
+                        },
+                    )
+
+                    try:
+                        adapter.page.keyboard.press("Escape")
+                        adapter.page.wait_for_timeout(500)
+
+                        adapter.page.goto(
+                            "https://www.douyin.com/?recommend=1&from_nav=1",
+                            wait_until="domcontentloaded",
+                            timeout=20000,
+                        )
+                        adapter.page.wait_for_timeout(3000)
+
+                        refreshed_state = adapter.classify_page_state(
+                            debug_label=f"{context}_captcha_refresh_check",
+                            capture=True,
+                        )
+
+                        if refreshed_state.state in {
+                            "recommend_feed_shell",
+                            "recommend_feed_interactable",
+                            "recommended_feed_ready",
+                        }:
+                            self.logger.info(
+                                "captcha disappeared after one refresh; continue workflow",
+                                extra={
+                                    "context": context,
+                                    "page_state": refreshed_state.state,
+                                    "page_url": refreshed_state.page_url,
+                                },
+                            )
+                            paused_once = True
+                            continue
+
+                        self.logger.warning(
+                            "captcha still present after refresh; stop run gracefully",
+                            extra={
+                                "context": context,
+                                "page_state": refreshed_state.state,
+                                "page_url": refreshed_state.page_url,
+                                "page_title": refreshed_state.page_title,
+                            },
+                        )
+
+                    except Exception as refresh_exc:
+                        self.logger.warning(
+                            "captcha refresh attempt failed; stop run gracefully",
+                            extra={
+                                "context": context,
+                                "error": str(refresh_exc),
+                            },
+                        )
+
+                    raise SearchAgentError(
+                        f"Captcha detected and still present after one refresh: {context}"
+                    )
+
                 if not self._handle_resumable_pause(adapter, exc, context=context, deadline=deadline):
                     raise
                 paused_once = True
@@ -656,7 +1646,13 @@ class CreatorDiscoveryWorkflow:
         follower_count_raw = profile.follower_count_raw if profile else None
         follower_count_normalized = normalize_chinese_count(follower_count_raw)
         profile_bio = profile.profile_bio if profile else None
+        safe_recent_video_titles = [
+            str(title)
+            for title in (profile.recent_video_titles if profile else [])
+            if title is not None and str(title).strip()
+        ]
         tagging = self.tagger.tag(
+
             TaggingContext(
                 creator_name=(profile.creator_name if profile else None) or candidate.creator_name,
                 profile_bio=profile_bio,
@@ -670,7 +1666,7 @@ class CreatorDiscoveryWorkflow:
                 chapter_texts=candidate.chapter_texts,
                 related_search_terms=candidate.related_search_terms,
                 author_statement_texts=candidate.author_statement_texts,
-                recent_videos_summary=profile.recent_video_titles if profile else [],
+                recent_videos_summary=safe_recent_video_titles,
                 visible_subtitle_segments=candidate.visible_subtitle_segments,
                 top_comments=candidate.top_comments,
                 visible_scenes=profile.visible_scenes if profile else [],
@@ -680,11 +1676,39 @@ class CreatorDiscoveryWorkflow:
                 extra_notes=profile_bio,
             )
         )
+        recent_works = []
+
+        if profile:
+            recent_video_like_raws = getattr(profile, "recent_video_like_raws", []) or []
+
+            for like_raw in recent_video_like_raws[:15]:
+                if like_raw is None:
+                    continue
+
+                like_text = str(like_raw).strip()
+                if not like_text:
+                    continue
+
+                recent_works.append({
+                    "index": len(recent_works) + 1,
+                    "like_count": like_text,
+                })
+
+                if len(recent_works) >= 15:
+                    break
+
+        recent_works_json = json.dumps(
+            recent_works,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+
         notes = "；".join(
             part
             for part in [
                 "内容快照已采集",
                 f"homepage_screenshot={cycle.homepage_screenshot_path}" if cycle.homepage_screenshot_path else None,
+                f"profile_recent_works_json={recent_works_json}" if recent_works else None,
                 f"feed_summary={candidate.active_text_summary}" if candidate.active_text_summary else None,
                 "video_url_missing" if not candidate.video_url else None,
                 "top_comments_missing" if not candidate.top_comments else None,
@@ -736,7 +1760,7 @@ class CreatorDiscoveryWorkflow:
             follower_count_normalized=follower_count_normalized,
             total_liked_count_raw=profile.total_liked_count_raw if profile else None,
             profile_bio=profile_bio,
-            recent_video_titles=profile.recent_video_titles if profile else [],
+            recent_video_titles=safe_recent_video_titles,
             visible_scenes=profile.visible_scenes if profile else [],
             speaking_style=profile.speaking_style if profile else None,
             video_duration_pattern=profile.video_duration_pattern if profile else None,

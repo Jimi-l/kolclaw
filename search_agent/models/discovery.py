@@ -19,7 +19,13 @@ class CreatorDiscoveryRecord(BaseModel):
 
     collection_date: str | None = None
     video_url: str | None = None
-    video_url_capture_source: Literal["network", "dom", "none"] | None = None
+    video_url_capture_source: Literal[
+    "network",
+    "network_validated",
+    "dom",
+    "share_copy",
+    "none",
+] | None = None
     publish_time_raw: str | None = None
     publish_date_normalized: str | None = None
     hotness_age_score: str | None = None
