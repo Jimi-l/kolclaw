@@ -2215,12 +2215,31 @@ class DouyinPageAdapter:
         total_liked_count_raw = _extract_total_likes(stats_text or "") or _extract_total_likes(text)
 
         # 最新 15 条非置顶作品
+        '''
         raw_recent_cards = self._collect_video_cards(limit=40)
         raw_recent_cards = [card for card in raw_recent_cards if not card.is_pinned] or raw_recent_cards
         
         recent_cards = _compact_profile_video_cards(
             raw_recent_cards,
             limit=15,
+            total_liked_count_raw=total_liked_count_raw,
+        )
+        '''
+        # 最新作品：先去掉置顶作品，再跳过前 3 个位置，避免 recent_01 ~ recent_03 抓到置顶/头部污染数据
+        raw_recent_cards = self._collect_video_cards(limit=40)
+
+        non_pinned_cards = [card for card in raw_recent_cards if not card.is_pinned]
+
+        if non_pinned_cards:
+            raw_recent_cards = non_pinned_cards
+
+        # 关键：不要使用 TA 的作品里最前面的 3 个作品位置
+        # 这样可以避免 recent_01_like_count、recent_02_like_count、recent_03_like_count 受到置顶作品影响
+        raw_recent_cards = raw_recent_cards[3:]
+
+        recent_cards = _compact_profile_video_cards(
+            raw_recent_cards,
+            limit=12,
             total_liked_count_raw=total_liked_count_raw,
         )
 

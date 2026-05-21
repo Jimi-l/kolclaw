@@ -230,8 +230,11 @@ def _export_discovery_records_csv(records: list, output_path: Path) -> None:
         "comment_count_raw", "share_count_raw", "favorite_count_raw",
         "homepage_screenshot_path"
     ]
-
+    '''
     for i in range(1, 16):
+        fieldnames.append(f"recent_{i:02d}_like_count")
+    '''
+    for i in range(4, 16):
         fieldnames.append(f"recent_{i:02d}_like_count")
 
     fieldnames.extend(["video_url", "video_url_capture_source", "comment_collection_status", "description"])
@@ -278,10 +281,22 @@ def _export_discovery_records_csv(records: list, output_path: Path) -> None:
                 or getattr(record, "expanded_description_text", "")
                 or getattr(record, "video_description_raw", ""),
             }
-
+            '''
             for i in range(1, 16):
                 prefix = f"recent_{i:02d}"
                 item = recent_works[i - 1] if i - 1 < len(recent_works) else {}
+
+                row[f"{prefix}_like_count"] = item.get("like_count", "") if isinstance(item, dict) else ""
+            '''
+
+            for i in range(4, 16):
+                prefix = f"recent_{i:02d}"
+
+                # recent_04 对应 recent_works[0]
+                # recent_05 对应 recent_works[1]
+                # ...
+                item_index = i - 4
+                item = recent_works[item_index] if item_index < len(recent_works) else {}
 
                 row[f"{prefix}_like_count"] = item.get("like_count", "") if isinstance(item, dict) else ""
    
