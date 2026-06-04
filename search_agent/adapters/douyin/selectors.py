@@ -320,7 +320,23 @@ FOOTER_ABNORMAL_HINTS = [
 LOGIN_HINTS = ["扫码登录", "手机号登录", "请登录", "登录查看更多内容"]
 QR_LOGIN_HINTS = ["扫码登录", "打开抖音扫码登录"]
 SMS_LOGIN_HINTS = ["短信登录", "验证码登录", "手机号登录"]
-CAPTCHA_HINTS = ["验证码", "滑块", "人机验证", "拖动滑块"]
+CAPTCHA_HINTS = [
+    "验证码",
+    "滑块",
+    "人机验证",
+    "拖动滑块",
+    "请完成下列验证后继续",
+    "完成下列验证后继续",
+    "按住左边按钮拖动完成上方拼图",
+    "拖动完成上方拼图",
+    "上方拼图",
+]
+CAPTCHA_MODAL_SELECTORS = [
+    "div[role='dialog']:has-text('验证')",
+    "div[role='dialog']:has-text('拼图')",
+    "div:has-text('请完成下列验证后继续'):has-text('拼图')",
+    "div:has-text('按住左边按钮拖动完成上方拼图')",
+]
 SESSION_EXPIRED_HINTS = ["登录失效", "请重新登录", "会话已过期"]
 LIVE_HINTS = ["直播中", "直播间"]
 LIVE_ROOM_HINTS = [

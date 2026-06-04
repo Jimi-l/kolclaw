@@ -378,6 +378,57 @@ class DouyinPageAdapter:
         except Exception:
             return None
 
+    def _detect_captcha_phrase(self) -> str | None:
+        phrase = page_contains_any_text(self.page, selectors.CAPTCHA_HINTS)
+        if phrase:
+            return phrase
+        locator = first_visible_locator(self.page, selectors.CAPTCHA_MODAL_SELECTORS, timeout_ms=350)
+        if locator is not None:
+            text = locator_text(locator, timeout_ms=350)
+            return _summarize_text(text, limit=80) or "captcha_modal"
+        try:
+            result = self.page.evaluate(
+                """() => {
+                    const isVisible = (el) => {
+                        if (!el) return false;
+                        const style = window.getComputedStyle(el);
+                        if (!style || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) {
+                            return false;
+                        }
+                        const rect = el.getBoundingClientRect();
+                        return rect.width >= 220 && rect.height >= 140 && rect.bottom > 0 && rect.right > 0 && rect.top < window.innerHeight && rect.left < window.innerWidth;
+                    };
+                    const cleanText = (value) => (value || '').replace(/\\s+/g, ' ').trim();
+                    const dialogs = [...document.querySelectorAll("[role='dialog'], div, section")]
+                        .filter(isVisible)
+                        .map((el) => {
+                            const rect = el.getBoundingClientRect();
+                            const text = cleanText(el.innerText || el.textContent || '');
+                            const centered =
+                                rect.left < window.innerWidth * 0.7 &&
+                                rect.right > window.innerWidth * 0.25 &&
+                                rect.top < window.innerHeight * 0.45 &&
+                                rect.bottom > window.innerHeight * 0.25;
+                            return { text, centered, area: rect.width * rect.height };
+                        })
+                        .filter((item) => item.centered && item.text.length >= 8)
+                        .sort((a, b) => a.area - b.area);
+                    for (const item of dialogs) {
+                        const text = item.text;
+                        const hasCaptchaCore = /验证|人机|滑块|拼图/.test(text);
+                        const hasSliderInstruction = /拖动|按住|左边按钮/.test(text);
+                        const hasCaptchaActions = text.includes('刷新') && text.includes('反馈');
+                        if (hasCaptchaCore && (hasSliderInstruction || hasCaptchaActions || text.includes('继续'))) {
+                            return text.slice(0, 80);
+                        }
+                    }
+                    return null;
+                }"""
+            )
+            return str(result).strip() if result else None
+        except Exception:
+            return None
+
     def raise_for_blockers(self, page_name: str) -> None:
         snapshot = self.classify_page_state()
         if snapshot.state in {
@@ -394,7 +445,7 @@ class DouyinPageAdapter:
             "visual_feed_unstable",
         }:
             raise self._snapshot_to_blocking_error(snapshot, page_name=page_name)
-        if phrase := page_contains_any_text(self.page, selectors.CAPTCHA_HINTS):
+        if phrase := self._detect_captcha_phrase():
             screenshot = self._capture(f"{page_name}_captcha")
             raise BlockingStateError(
                 reason=BlockReason.CAPTCHA_BLOCKED,
@@ -475,7 +526,7 @@ class DouyinPageAdapter:
         recommend_ready = self._find_jingxuan_recommend_target(timeout_ms=250) is not None if on_jingxuan else False
         live_room_phrase = self._detect_live_room_phrase(current_url, text, looks_like_feed)
 
-        phrase = page_contains_any_text(self.page, selectors.CAPTCHA_HINTS)
+        phrase = self._detect_captcha_phrase()
         if phrase:
             screenshot = self._capture(
                 f"douyin_captcha_{debug_label}" if capture and debug_label else "douyin_captcha"
@@ -919,6 +970,7 @@ class DouyinPageAdapter:
                 ],
             )
         ) or None
+        has_live_avatar_badge = self._active_creator_has_live_avatar_badge(active_state)
 
         return FeedCandidateSnapshot(
             creator_name=creator_name,
@@ -934,7 +986,7 @@ class DouyinPageAdapter:
             favorite_count_raw=favorite_count_raw,
             share_count_raw=share_count_raw,
             ai_generated_flag=_contains_any(raw_text, selectors.AI_HINTS),
-            is_live=_looks_like_live_feed_item(raw_text, creator_profile_url=creator_profile_url, video_url=video_url),
+            is_live=has_live_avatar_badge or _looks_like_live_feed_item(raw_text, creator_profile_url=creator_profile_url, video_url=video_url),
             is_ad=_contains_any(raw_text, selectors.AD_HINTS),
             caption_text=raw_text.splitlines()[0].strip() if raw_text else None,
             raw_text=raw_text,
@@ -2568,6 +2620,8 @@ class DouyinPageAdapter:
 
     def return_to_feed(self) -> None:
         page_state = self.classify_page_state(debug_label="return_to_feed", capture=False)
+        if page_state.state == "captcha_blocked":
+            raise self._snapshot_to_blocking_error(page_state, page_name="douyin_return_to_feed")
         if page_state.state == "live_room_open":
             if self._recover_from_live_room(page_state):
                 return
@@ -2610,6 +2664,8 @@ class DouyinPageAdapter:
         self._dismiss_login_modal(reason="advance_feed_preflight", debug_label=debug_label)
         self._dismiss_feed_side_panel(reason="advance_feed_preflight", debug_label=debug_label)
         page_state = self.classify_page_state(debug_label=debug_label)
+        if page_state.state == "captcha_blocked":
+            raise self._snapshot_to_blocking_error(page_state, page_name="douyin_advance_feed")
         for remediation_attempt in range(2):
             if page_state.state == "self_profile_open":
                 try:
@@ -2626,6 +2682,8 @@ class DouyinPageAdapter:
                 except Exception:
                     break
                 page_state = self.classify_page_state(debug_label=f"{debug_label}_post_self_profile_recovery" if debug_label else None)
+                if page_state.state == "captcha_blocked":
+                    raise self._snapshot_to_blocking_error(page_state, page_name="douyin_advance_feed")
                 continue
             if page_state.state == "creator_homepage_open":
                 try:
@@ -2642,11 +2700,15 @@ class DouyinPageAdapter:
                 except Exception:
                     break
                 page_state = self.classify_page_state(debug_label=f"{debug_label}_post_homepage_close" if debug_label else None)
+                if page_state.state == "captcha_blocked":
+                    raise self._snapshot_to_blocking_error(page_state, page_name="douyin_advance_feed")
                 continue
             if page_state.state == "live_room_open":
                 if not self._recover_from_live_room(page_state):
                     break
                 page_state = self.classify_page_state(debug_label=f"{debug_label}_post_live_recovery" if debug_label else None)
+                if page_state.state == "captcha_blocked":
+                    raise self._snapshot_to_blocking_error(page_state, page_name="douyin_advance_feed")
                 continue
             break
         if page_state.state not in {"recommend_feed_shell", "recommend_feed_interactable", "recommended_feed_ready"}:
@@ -2670,6 +2732,8 @@ class DouyinPageAdapter:
         )
         if self._click_next_feed_arrow(debug_label=debug_label, reason="advance_feed"):
             post_click_state = self.classify_page_state(debug_label=f"{debug_label}_after_right_arrow" if debug_label else None)
+            if post_click_state.state == "captcha_blocked":
+                raise self._snapshot_to_blocking_error(post_click_state, page_name="douyin_advance_feed")
             if post_click_state.state == "live_room_open":
                 self.logger.info(
                     "right-arrow navigation entered live room; recovering and trying fallback movement",
@@ -2681,6 +2745,8 @@ class DouyinPageAdapter:
                 )
                 if self._recover_from_live_room(post_click_state):
                     page_state = self.classify_page_state(debug_label=f"{debug_label}_after_live_recovery" if debug_label else None)
+                    if page_state.state == "captcha_blocked":
+                        raise self._snapshot_to_blocking_error(page_state, page_name="douyin_advance_feed")
                     if page_state.state in {"recommend_feed_shell", "recommend_feed_interactable", "recommended_feed_ready"}:
                         before_state = self._extract_active_feed_state()
                         previous_identity = self._candidate_identity(previous_candidate) or _state_identity(before_state)
@@ -2739,6 +2805,8 @@ class DouyinPageAdapter:
             if not self._wait_for_timeout_safe(1_000, reason=f"advance_feed_wheel_{distance}"):
                 break
             wheel_state = self.classify_page_state(debug_label=f"{debug_label}_after_wheel_{distance}" if debug_label else None)
+            if wheel_state.state == "captcha_blocked":
+                raise self._snapshot_to_blocking_error(wheel_state, page_name="douyin_advance_feed")
             if wheel_state.state == "live_room_open":
                 self.logger.info(
                     "wheel navigation entered live room; recovering and continuing feed advance",
@@ -2792,9 +2860,13 @@ class DouyinPageAdapter:
         self.page.keyboard.press("PageDown")
         self._wait_for_timeout_safe(1_100, reason="advance_feed_pagedown")
         pagedown_state = self.classify_page_state(debug_label=f"{debug_label}_after_pagedown" if debug_label else None)
+        if pagedown_state.state == "captcha_blocked":
+            raise self._snapshot_to_blocking_error(pagedown_state, page_name="douyin_advance_feed")
         if pagedown_state.state == "live_room_open":
             if self._recover_from_live_room(pagedown_state):
                 pagedown_state = self.classify_page_state(debug_label=f"{debug_label}_post_pagedown_live_recovery" if debug_label else None)
+                if pagedown_state.state == "captcha_blocked":
+                    raise self._snapshot_to_blocking_error(pagedown_state, page_name="douyin_advance_feed")
         after_candidate = self._collect_feed_snapshot(active_state=self._extract_active_feed_state())
         after_identity = self._candidate_identity(after_candidate)
         after_summary = after_candidate.active_text_summary or _summarize_text(body_text(self.page))
@@ -3036,6 +3108,9 @@ class DouyinPageAdapter:
     def _recover_from_live_room(self, snapshot: PageStateSnapshot | None = None) -> bool:
         if not self._ensure_page_open(goto_base=False, reason="recover_from_live_room"):
             return False
+        captcha_snapshot = self.classify_page_state(debug_label="live_room_recovery_captcha_guard", capture=True)
+        if captcha_snapshot.state == "captcha_blocked":
+            raise self._snapshot_to_blocking_error(captcha_snapshot, page_name="douyin_live_room_recovery")
         self.logger.warning(
             "douyin live room detected; attempting to return to recommend feed",
             extra={
@@ -4786,6 +4861,128 @@ class DouyinPageAdapter:
         if not any(hint in active_text for hint in selectors.FEED_TEXT_HINTS):
             return None
         return state
+
+    def _active_creator_has_live_avatar_badge(self, active_state: dict | None = None) -> bool:
+        creator_profile_url = _normalize_url((active_state or {}).get("creator_profile_url"))
+        if creator_profile_url and "/live" in creator_profile_url.lower():
+            return True
+        try:
+            result = self.page.evaluate(
+                """(creatorProfileUrl) => {
+                    const isVisible = (el) => {
+                        if (!el) return false;
+                        const style = window.getComputedStyle(el);
+                        if (!style || style.display === 'none' || style.visibility === 'hidden' || Number(style.opacity || '1') === 0) {
+                            return false;
+                        }
+                        const rect = el.getBoundingClientRect();
+                        return rect.width >= 12 && rect.height >= 12 && rect.bottom > 0 && rect.right > 0 && rect.top < window.innerHeight && rect.left < window.innerWidth;
+                    };
+                    const cleanText = (value) => (value || '').replace(/\\s+/g, ' ').trim();
+                    const hasLiveText = (el) => {
+                        const text = cleanText([
+                            el.innerText,
+                            el.getAttribute('aria-label'),
+                            el.getAttribute('title'),
+                            el.getAttribute('alt'),
+                        ].filter(Boolean).join(' '));
+                        return /直播|LIVE/i.test(text);
+                    };
+                    const colorParts = (value) => {
+                        const match = String(value || '').match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/i);
+                        return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+                    };
+                    const isLiveRed = (value) => {
+                        const parts = colorParts(value);
+                        if (!parts) return false;
+                        const [r, g, b] = parts;
+                        return r >= 180 && g <= 110 && b <= 150;
+                    };
+                    const hasRedVisual = (el) => {
+                        const style = window.getComputedStyle(el);
+                        const values = [
+                            style.borderTopColor,
+                            style.borderRightColor,
+                            style.borderBottomColor,
+                            style.borderLeftColor,
+                            style.backgroundColor,
+                            style.boxShadow,
+                            style.outlineColor,
+                            style.color,
+                        ];
+                        return values.some(isLiveRed);
+                    };
+                    const isRoundishAvatarContainer = (el) => {
+                        if (!isVisible(el)) return false;
+                        const rect = el.getBoundingClientRect();
+                        if (rect.width < 28 || rect.width > 120 || rect.height < 28 || rect.height > 120) return false;
+                        const ratio = rect.width / Math.max(1, rect.height);
+                        if (ratio < 0.65 || ratio > 1.35) return false;
+                        const style = window.getComputedStyle(el);
+                        const radius = parseFloat(style.borderTopLeftRadius || '0');
+                        const roundish = radius >= Math.min(rect.width, rect.height) * 0.25 || String(style.borderRadius || '').includes('%');
+                        return roundish && Boolean(el.querySelector('img, picture, canvas, svg'));
+                    };
+                    const inLikelyActiveArea = (el) => {
+                        const rect = el.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+                        const rightRail = centerX >= window.innerWidth * 0.72 && centerY >= window.innerHeight * 0.16 && centerY <= window.innerHeight * 0.88;
+                        const videoBand = centerX >= window.innerWidth * 0.28 && centerX <= window.innerWidth * 0.78 && centerY >= window.innerHeight * 0.12 && centerY <= window.innerHeight * 0.92;
+                        return rightRail || videoBand;
+                    };
+                    const normalizeUrl = (value) => String(value || '').split('?')[0].replace(/\\/$/, '');
+                    const creatorUrl = normalizeUrl(creatorProfileUrl);
+                    const anchors = [...document.querySelectorAll("a[href]")].filter(isVisible);
+                    if (anchors.some((anchor) => inLikelyActiveArea(anchor) && /\\/live|live\\.douyin\\.com/i.test(anchor.href))) {
+                        return true;
+                    }
+                    const creatorAnchors = anchors.filter((anchor) => {
+                        const href = normalizeUrl(anchor.href);
+                        return href.includes('/user/') && (!creatorUrl || href === creatorUrl);
+                    });
+                    for (const anchor of creatorAnchors) {
+                        if (!inLikelyActiveArea(anchor)) continue;
+                        let node = anchor;
+                        for (let depth = 0; node && depth < 5; depth += 1, node = node.parentElement) {
+                            if (hasLiveText(node)) return true;
+                            if (isRoundishAvatarContainer(node) && hasRedVisual(node)) return true;
+                        }
+                    }
+                    const candidates = [...document.querySelectorAll("a[href*='/user/'], img, [class*='avatar'], [class*='Avatar'], [class*='author'], [class*='Author'], [class*='live'], [class*='Live'], [aria-label], [title]")]
+                        .filter((el) => isVisible(el) && inLikelyActiveArea(el));
+                    for (const el of candidates) {
+                        if (hasLiveText(el)) return true;
+                        let node = el;
+                        for (let depth = 0; node && depth < 4; depth += 1, node = node.parentElement) {
+                            if (hasLiveText(node)) return true;
+                            if (isRoundishAvatarContainer(node) && hasRedVisual(node)) return true;
+                        }
+                    }
+                    return false;
+                }""",
+                creator_profile_url,
+            )
+            if bool(result):
+                self.logger.info(
+                    "live avatar badge detected on active feed item; skip F-key homepage open",
+                    extra={
+                        "creator_profile_url": creator_profile_url,
+                        "page_url": self.page.url,
+                        "page_title": self._safe_title(),
+                    },
+                )
+            return bool(result)
+        except Exception as exc:
+            self.logger.info(
+                "active live avatar badge detection failed",
+                extra={
+                    "creator_profile_url": creator_profile_url,
+                    "page_url": self.page.url,
+                    "error": str(exc),
+                },
+            )
+            return False
 
     def _current_feed_identity(self) -> str | None:
         state = self._extract_active_feed_state()
