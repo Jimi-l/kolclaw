@@ -73,6 +73,12 @@ def build_parser() -> argparse.ArgumentParser:
     enrichment.add_argument("--enrichment-output", type=str, help="Optional JSONL output path for enrichment records.")
     enrichment.add_argument("--artifacts-dir", type=str, help="Optional artifacts root override.")
     enrichment.add_argument("--browser-channel", type=str, default=None, help="Optional browser channel, e.g. chrome.")
+    enrichment.add_argument("--retry-blocked", action="store_true", help="Retry records that only have blocked enrichment results.")
+    enrichment.add_argument(
+        "--retry-incomplete",
+        action="store_true",
+        help="Retry enrichment records that are not completed, including blocked, ambiguous, not-found, and partial results.",
+    )
     enrichment.add_argument("--log-level", type=str, default="INFO", help="Logging level.")
 
     video_url_analysis = subparsers.add_parser(
@@ -421,7 +427,11 @@ def run_xingtu_enrichment(args: argparse.Namespace) -> int:
             headless=args.headless,
             channel=args.browser_channel,
         ),
-        run_config=EnrichmentRunConfig(max_items=args.max_items),
+        run_config=EnrichmentRunConfig(
+            max_items=args.max_items,
+            retry_blocked=args.retry_blocked,
+            retry_incomplete=args.retry_incomplete,
+        ),
     )
     summary = workflow.run()
     return _emit_summary(summary.model_dump(mode="json"), 0)

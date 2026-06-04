@@ -46,3 +46,16 @@ def test_match_confidence_low_on_conflict() -> None:
     )
     assert decision.match_confidence == MatchConfidence.LOW
     assert decision.next_action == NextAction.MANUAL_REVIEW
+
+
+def test_unique_exact_name_match_is_high_even_with_sparse_hints() -> None:
+    decision = evaluate_xingtu_match(
+        make_discovery_record(),
+        candidate_name="示例达人A",
+        candidate_follower_hint=None,
+        candidate_creator_type=None,
+        candidate_content_hint=None,
+        exact_unique_name_match=True,
+    )
+    assert decision.match_confidence == MatchConfidence.HIGH
+    assert decision.is_same_creator is True

@@ -32,7 +32,7 @@ class BrowserSession:
             "user_data_dir": str(self.user_data_dir),
             "headless": self.browser_config.headless,
             "locale": "zh-CN",
-            "viewport": {"width": 1440, "height": 1080},
+            "viewport": {"width": 1080, "height": 720},
             "ignore_https_errors": True,
             "slow_mo": self.browser_config.slow_mo_ms,
             "args": [
@@ -40,7 +40,9 @@ class BrowserSession:
                 "--disable-default-apps",
                 "--disable-notifications",
                 "--disable-external-protocol-dialog",
-                "--disable-features=DownloadBubble,DownloadBubbleV2",
+                "--disable-features=DownloadBubble,"
+                "DownloadBubbleV2",
+                
             ],
         }
         if self.browser_config.channel:

@@ -93,6 +93,8 @@ class EnrichmentRunConfig:
     max_items: int = 50
     min_query_interval_seconds: float = 1.5
     max_query_interval_seconds: float = 3.0
+    retry_blocked: bool = False
+    retry_incomplete: bool = False
 
 
 @dataclass(slots=True)

@@ -38,6 +38,7 @@ def evaluate_xingtu_match(
     candidate_creator_type: str | None,
     candidate_content_hint: str | None,
     avatar_style_match: bool | None = None,
+    exact_unique_name_match: bool = False,
 ) -> MatchDecision:
     score = 0
     conflicts: list[str] = []
@@ -95,6 +96,16 @@ def evaluate_xingtu_match(
     elif avatar_style_match is False:
         conflicts.append("头像/主页风格冲突")
         score -= 2
+
+    if exact_unique_name_match and discovery_name == xingtu_name and discovery_name != "unknown":
+        return MatchDecision(
+            is_same_creator=True,
+            match_confidence=MatchConfidence.HIGH,
+            match_reason="搜索结果中只有一个达人名称与发现记录精确一致",
+            conflict_points=conflicts,
+            next_action=NextAction.CONTINUE,
+            score=max(score, 6),
+        )
 
     if score >= 6 and not any("明显" in item or "冲突" in item for item in conflicts):
         return MatchDecision(

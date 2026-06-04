@@ -25,6 +25,10 @@ class XingtuEnrichmentRecord(BaseModel):
     price_20s: float | None = None
     price_20_60s: float | None = None
     price_60s_plus: float | None = None
+    price_insert_video: float | None = None
+    price_custom_video: float | None = None
+    price_douyin_image_text: float | None = None
+    other_service_prices: dict[str, float] | None = None
 
     estimated_play: str | int | None = None
     sponsored_median_play: str | int | None = None

@@ -611,6 +611,7 @@ class CreatorDiscoveryWorkflow:
         self.paths.ensure_directories()
         existing_records = self.discovery_store.load_all()
         processed = qualified = skipped = blocked = 0
+        xingtu_queued = 0
         observation_count = 0
         records_for_analysis: set[str] = set()
         saved_records_for_table: list[CreatorDiscoveryRecord] = []
@@ -1079,6 +1080,8 @@ class CreatorDiscoveryWorkflow:
                     if self.run_config.content_analysis_enabled:
                         self.analysis_queue_store.enqueue(record)
                         records_for_analysis.add(record.record_id)
+                    if self._enqueue_record_for_xingtu(record):
+                        xingtu_queued += 1
                     qualified += 1
                     _print_discovery_record_to_terminal(record)
 
@@ -1211,10 +1214,39 @@ class CreatorDiscoveryWorkflow:
             successful_records=qualified,
             skipped_items=skipped,
             blocked_items=blocked,
-            next_stage_ready=analysis_processed,
+            next_stage_ready=xingtu_queued,
             output_path=str(self.paths.discovery_output),
-            queue_path=str(self.paths.analysis_queue_output),
+            queue_path=str(self.paths.queue_output),
         )
+
+    def _enqueue_record_for_xingtu(self, record: CreatorDiscoveryRecord) -> bool:
+        if not record.is_ready_for_xingtu():
+            self.logger.info(
+                "discovery record not queued for Xingtu because required fields are incomplete",
+                extra={
+                    "record_id": record.record_id,
+                    "creator_name": record.creator_name,
+                    "video_url": record.video_url,
+                    "collection_date": record.collection_date,
+                    "total_interaction_text": record.total_interaction_text,
+                    "follower_count_raw": record.follower_count_raw,
+                    "has_content_tags": bool(record.content_leaf_tags or record.content_taxonomy_path),
+                },
+            )
+            return False
+        queue_payload = record.model_dump(mode="json")
+        queue_payload.update(
+            {
+                "status": RecordStatus.QUEUED_FOR_XINGTU.value,
+                "next_action": NextAction.QUEUE_FOR_XINGTU.value,
+            }
+        )
+        self.queue_store.enqueue(CreatorDiscoveryRecord.model_validate(queue_payload))
+        self.logger.info(
+            "discovery record queued for Xingtu enrichment",
+            extra={"record_id": record.record_id, "creator_name": record.creator_name, "queue_path": str(self.paths.queue_output)},
+        )
+        return True
     @staticmethod
     def _screen_candidate(candidate: FeedCandidateSnapshot) -> str | None:
         if candidate.is_ad:
