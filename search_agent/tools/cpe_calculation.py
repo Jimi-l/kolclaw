@@ -5,6 +5,7 @@ import csv
 import re
 from dataclasses import dataclass
 from datetime import datetime
+from difflib import SequenceMatcher
 from pathlib import Path
 from statistics import median
 from typing import Any
@@ -13,6 +14,36 @@ from typing import Any
 COUNT_RE = re.compile(r"(?P<number>\d+(?:\.\d+)?)\s*(?P<unit>亿|万|w|k|千)?", re.IGNORECASE)
 RECENT_LIKE_PREFIX = "recent_"
 RECENT_LIKE_SUFFIX = "_like_count"
+DEFAULT_DEDUPE_SIMILARITY_THRESHOLD = 0.88
+UNDER_100K_FOLLOWER_CUTOFF = 100_000
+MID_CPE_EXCLUDE_FLOOR = 1.5
+MID_CPE_EXCLUDE_CEILING = 3.0
+DESCRIPTION_STOP_MARKERS = (
+    "倍速",
+    "智能",
+    "清屏",
+    "连播",
+    "详情",
+    "TA的作品",
+    "评论",
+    "合集",
+    "问AI",
+    "相关推荐",
+    "大家都在搜",
+    "全部评论",
+    "发送",
+    "展开",
+    "汽水音乐:",
+)
+DESCRIPTION_DYNAMIC_WORDS = ("听抖音", *DESCRIPTION_STOP_MARKERS)
+COMMERCIAL_VALUE_LEVELS = (
+    "strong_value",
+    "viable_value",
+    "expensive_review",
+    "needs_review",
+    "needs_price",
+    "no_commercial_value",
+)
 FOLLOWER_PRICE_BANDS = [
     (100_000, (0, 1_500), (1_500, 3_000), "under_100k"),
     (150_000, (2_300, 4_400), (4_400, 6_500), "100k_150k"),
@@ -137,6 +168,10 @@ def analyze_csv(
     *,
     price_column: str | None = None,
     default_price: float | None = None,
+    commercial_value_levels: set[str] | None = None,
+    dedupe_similar_videos: bool = False,
+    dedupe_similarity_threshold: float = DEFAULT_DEDUPE_SIMILARITY_THRESHOLD,
+    exclude_under_100k_mid_cpe: bool = False,
 ) -> Path:
     config = config or CpeConfig()
     output_path = output_path or _default_output_path(input_path)
@@ -158,7 +193,20 @@ def analyze_csv(
                 price_column=price_column,
                 default_price=default_price,
             )
-            rows.append({**row, **_assessment_to_csv_fields(assessment)})
+            if commercial_value_levels and assessment.commercial_value_level not in commercial_value_levels:
+                continue
+            if exclude_under_100k_mid_cpe and _is_under_100k_mid_cpe(assessment):
+                continue
+            rows.append(
+                {
+                    "_source_csv_for_dedupe": input_path.name,
+                    **row,
+                    **_assessment_to_csv_fields(assessment),
+                }
+            )
+
+    if dedupe_similar_videos:
+        rows = _dedupe_similar_video_rows(rows, dedupe_similarity_threshold)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8-sig", newline="") as target:
@@ -176,6 +224,10 @@ def analyze_csvs(
     *,
     price_column: str | None = None,
     default_price: float | None = None,
+    commercial_value_levels: set[str] | None = None,
+    dedupe_similar_videos: bool = False,
+    dedupe_similarity_threshold: float = DEFAULT_DEDUPE_SIMILARITY_THRESHOLD,
+    exclude_under_100k_mid_cpe: bool = False,
 ) -> Path:
     if not input_paths:
         raise ValueError("At least one input CSV is required.")
@@ -186,6 +238,10 @@ def analyze_csvs(
             config,
             price_column=price_column,
             default_price=default_price,
+            commercial_value_levels=commercial_value_levels,
+            dedupe_similar_videos=dedupe_similar_videos,
+            dedupe_similarity_threshold=dedupe_similarity_threshold,
+            exclude_under_100k_mid_cpe=exclude_under_100k_mid_cpe,
         )
 
     config = config or CpeConfig()
@@ -206,13 +262,21 @@ def analyze_csvs(
                     price_column=price_column,
                     default_price=default_price,
                 )
+                if commercial_value_levels and assessment.commercial_value_level not in commercial_value_levels:
+                    continue
+                if exclude_under_100k_mid_cpe and _is_under_100k_mid_cpe(assessment):
+                    continue
                 rows.append(
                     {
+                        "_source_csv_for_dedupe": input_path.name,
                         "source_csv": input_path.name,
                         **row,
                         **_assessment_to_csv_fields(assessment),
                     }
                 )
+
+    if dedupe_similar_videos:
+        rows = _dedupe_similar_video_rows(rows, dedupe_similarity_threshold)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with output_path.open("w", encoding="utf-8-sig", newline="") as target:
@@ -221,6 +285,126 @@ def analyze_csvs(
         writer.writerows(rows)
 
     return output_path
+
+
+def _is_under_100k_mid_cpe(assessment: CreatorCpeAssessment) -> bool:
+    return (
+        assessment.follower_count is not None
+        and assessment.follower_count < UNDER_100K_FOLLOWER_CUTOFF
+        and assessment.adjusted_cpe is not None
+        and MID_CPE_EXCLUDE_FLOOR <= assessment.adjusted_cpe <= MID_CPE_EXCLUDE_CEILING
+    )
+
+
+def _dedupe_similar_video_rows(rows: list[dict[str, Any]], similarity_threshold: float) -> list[dict[str, Any]]:
+    if not rows:
+        return rows
+
+    indexed_rows = list(enumerate(rows))
+    rows_by_creator: dict[str, list[tuple[int, dict[str, Any]]]] = {}
+    for original_index, row in indexed_rows:
+        creator_key = _normalize_dedupe_text(row.get("creator_name"))
+        rows_by_creator.setdefault(creator_key, []).append((original_index, row))
+
+    keep_indexes: set[int] = set()
+    for creator_rows in rows_by_creator.values():
+        if len(creator_rows) == 1:
+            keep_indexes.add(creator_rows[0][0])
+            continue
+
+        adjacency = [[] for _ in creator_rows]
+        for left_index, (_, left_row) in enumerate(creator_rows):
+            for right_index in range(left_index + 1, len(creator_rows)):
+                _, right_row = creator_rows[right_index]
+                if _is_same_dedupe_video(left_row, right_row, similarity_threshold):
+                    adjacency[left_index].append(right_index)
+                    adjacency[right_index].append(left_index)
+
+        seen = [False] * len(creator_rows)
+        for start_index in range(len(creator_rows)):
+            if seen[start_index]:
+                continue
+            stack = [start_index]
+            seen[start_index] = True
+            component: list[tuple[int, dict[str, Any]]] = []
+            while stack:
+                current_index = stack.pop()
+                component.append(creator_rows[current_index])
+                for next_index in adjacency[current_index]:
+                    if not seen[next_index]:
+                        seen[next_index] = True
+                        stack.append(next_index)
+
+            kept_index, _ = max(
+                component,
+                key=lambda item: (_source_csv_run_time(item[1]), item[0]),
+            )
+            keep_indexes.add(kept_index)
+
+    return [row for original_index, row in indexed_rows if original_index in keep_indexes]
+
+
+def _is_same_dedupe_video(left_row: dict[str, Any], right_row: dict[str, Any], similarity_threshold: float) -> bool:
+    left_url = str(left_row.get("video_url") or "").strip()
+    right_url = str(right_row.get("video_url") or "").strip()
+    if left_url and left_url == right_url:
+        return True
+
+    left_description = _normalize_dedupe_description(left_row.get("description"))
+    right_description = _normalize_dedupe_description(right_row.get("description"))
+    if not left_description or not right_description:
+        return False
+
+    shorter, longer = (
+        (left_description, right_description)
+        if len(left_description) <= len(right_description)
+        else (right_description, left_description)
+    )
+    if len(shorter) >= 12 and shorter in longer:
+        return True
+    return SequenceMatcher(None, left_description, right_description).ratio() >= similarity_threshold
+
+
+def _normalize_dedupe_text(value: Any) -> str:
+    return re.sub(r"\s+", "", str(value or "").strip().lower())
+
+
+def _normalize_dedupe_description(value: Any) -> str:
+    text = _core_video_description(str(value or "")).lower()
+    text = re.sub(r"https?://\S+", "", text)
+    text = re.sub(r"\d{1,2}:\d{2}\s*/\s*\d{1,2}:\d{2}", "", text)
+    text = re.sub(r"\d+(?:\.\d+)?\s*(?:万|亿|k|w)?", "", text, flags=re.IGNORECASE)
+    for word in DESCRIPTION_DYNAMIC_WORDS:
+        text = text.replace(word.lower(), "")
+    text = re.sub(r"\s+", "", text)
+    return re.sub(r"[，,。.!！?？:：;；“”\"'（）()【】\[\]#/@·~\-—_、]", "", text)
+
+
+def _core_video_description(value: str) -> str:
+    text = value.strip()
+    creator_marker = re.search(r"@[^·]{1,80}·\s*(?:\d+小时前|\d+天前|\d+月\d+日|昨天|前天)\s*", text)
+    if creator_marker:
+        text = text[creator_marker.end() :]
+
+    cut_positions: list[int] = []
+    progress_marker = re.search(r"\d{1,2}:\d{2}\s*/\s*\d{1,2}:\d{2}", text)
+    if progress_marker:
+        cut_positions.append(progress_marker.start())
+    for marker in DESCRIPTION_STOP_MARKERS:
+        marker_index = text.find(marker)
+        if marker_index >= 0:
+            cut_positions.append(marker_index)
+    if cut_positions:
+        text = text[: min(cut_positions)]
+    return text.strip()
+
+
+def _source_csv_run_time(row: dict[str, Any]) -> datetime:
+    source_csv = str(row.get("source_csv") or row.get("_source_csv_for_dedupe") or "")
+    match = re.search(r"_(\d{8})_(\d{6})", source_csv)
+    if not match:
+        return datetime.min
+    return datetime.strptime("".join(match.groups()), "%Y%m%d%H%M%S")
 
 
 def _recent_like_counts(row: dict[str, Any]) -> list[int]:
@@ -511,6 +695,28 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--default-price", type=float, help="Fallback price used for every creator when no price column exists.")
     parser.add_argument("--min-current-likes", type=int, default=10_000, help="Exclude creators below this current-video like count.")
     parser.add_argument("--focus-like-threshold", type=int, default=30_000, help="Mark creators at or above this like count as focus accounts.")
+    parser.add_argument(
+        "--commercial-value-level",
+        choices=COMMERCIAL_VALUE_LEVELS,
+        nargs="+",
+        help="Only write rows whose commercial_value_level is in this list.",
+    )
+    parser.add_argument(
+        "--dedupe-similar-videos",
+        action="store_true",
+        help="Deduplicate same-creator rows with the same or highly similar video description, keeping the newest source_csv run.",
+    )
+    parser.add_argument(
+        "--dedupe-similarity-threshold",
+        type=float,
+        default=DEFAULT_DEDUPE_SIMILARITY_THRESHOLD,
+        help="Similarity threshold used by --dedupe-similar-videos.",
+    )
+    parser.add_argument(
+        "--exclude-under-100k-mid-cpe",
+        action="store_true",
+        help="Exclude rows with fewer than 100k followers and adjusted_cpe between 1.5 and 3.0.",
+    )
     return parser
 
 
@@ -526,6 +732,10 @@ def main(argv: list[str] | None = None) -> int:
         config,
         price_column=args.price_column,
         default_price=args.default_price,
+        commercial_value_levels=set(args.commercial_value_level) if args.commercial_value_level else None,
+        dedupe_similar_videos=args.dedupe_similar_videos,
+        dedupe_similarity_threshold=args.dedupe_similarity_threshold,
+        exclude_under_100k_mid_cpe=args.exclude_under_100k_mid_cpe,
     )
     print(f"Wrote CPE summary: {output_path}")
     return 0
