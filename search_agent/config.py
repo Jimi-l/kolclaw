@@ -89,6 +89,20 @@ class DiscoveryRunConfig:
 
 
 @dataclass(slots=True)
+class DouyinVerticalRunConfig(DiscoveryRunConfig):
+    tag_table_path: Path | None = None
+    per_tag_minutes: float = 3.0
+    per_tag_records: int | None = None
+    search_publish_filter: str = "一周内"
+    include_hash_in_search: bool = True
+    tag_cooldown_min_seconds: float = 8.0
+    tag_cooldown_max_seconds: float = 18.0
+    pressure_cooldown_min_seconds: float = 45.0
+    pressure_cooldown_max_seconds: float = 90.0
+    force_jingxuan_search_url: bool = True
+
+
+@dataclass(slots=True)
 class EnrichmentRunConfig:
     max_items: int = 50
     min_query_interval_seconds: float = 1.5

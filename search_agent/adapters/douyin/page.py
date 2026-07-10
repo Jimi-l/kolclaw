@@ -3813,6 +3813,16 @@ class DouyinPageAdapter:
             return snapshot.state in {"recommend_feed_shell", "recommend_feed_interactable", "recommended_feed_ready"}
         except Exception:
             return self._extract_active_feed_state() is not None
+
+    @staticmethod
+    def _is_recommend_transition_state(state: str) -> bool:
+        return state in {
+            "recommend_feed_shell",
+            "recommend_feed_interactable",
+            "recommended_feed_ready",
+            "public_feed",
+            "visual_feed_unstable",
+        }
         
     def enter_recommend_feed_from_jingxuan(self) -> bool:
         """
@@ -3867,8 +3877,11 @@ class DouyinPageAdapter:
                 self.page.wait_for_timeout(800)
             except Exception:
                 pass
-
-            return True
+            try:
+                snapshot = self.classify_page_state(debug_label=f"jingxuan_direct_{reason}", capture=False)
+            except Exception:
+                return self._extract_active_feed_state() is not None
+            return self._is_recommend_transition_state(snapshot.state)
 
         # 1️⃣ 如果当前页有“推荐”按钮，尝试点击
         locator = self._find_jingxuan_recommend_target(timeout_ms=800)
@@ -3877,10 +3890,18 @@ class DouyinPageAdapter:
                 locator.scroll_into_view_if_needed(timeout=1_000)
                 locator.click(timeout=1_200)
                 self._wait_for_timeout_safe(1_500, reason="jingxuan_recommend_click")
+                post_click_snapshot = self.classify_page_state(debug_label="jingxuan_recommend_click_post", capture=False)
+                if self._is_recommend_transition_state(post_click_snapshot.state):
+                    self.logger.info(
+                        "点击 jingxuan 推荐成功",
+                        extra={"page_state": post_click_snapshot.state, "page_url": post_click_snapshot.page_url},
+                    )
+                    return True
                 self.logger.info(
-                    "点击 jingxuan 推荐成功"
+                    "jingxuan 推荐点击后仍未进入推荐流，改为直接跳转",
+                    extra={"page_state": post_click_snapshot.state, "page_url": post_click_snapshot.page_url},
                 )
-                return True
+                return _goto_direct_recommend(f"recommend_click_stuck:{post_click_snapshot.state}")
             except Exception:
                 # 点击失败直接跳推荐流
                 return _goto_direct_recommend("recommend_click_failed")

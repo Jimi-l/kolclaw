@@ -6,6 +6,7 @@ from enum import Enum
 class WorkflowStage(str, Enum):
     ROUTING = "routing"
     CREATOR_DISCOVERY = "creator-discovery"
+    DOUYIN_VERTICAL_DISCOVERY = "douyin-vertical-discovery"
     XINGTU_ENRICHMENT = "xingtu-enrichment"
     CONTENT_ANALYSIS = "content-analysis"
     VIDEO_URL_ANALYSIS = "video-url-analysis"

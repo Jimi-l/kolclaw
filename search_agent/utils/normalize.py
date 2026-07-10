@@ -101,6 +101,9 @@ def normalize_publish_date(raw_value: str | None, reference_date: date | None = 
     match = re.search(r"(\d+)\s*天前", value)
     if match:
         return (today - timedelta(days=int(match.group(1)))).isoformat()
+    match = re.search(r"(\d{4})年(\d{1,2})月(\d{1,2})日", value)
+    if match:
+        return date(int(match.group(1)), int(match.group(2)), int(match.group(3))).isoformat()
     match = re.search(r"(\d{1,2})月(\d{1,2})日", value)
     if match:
         month = int(match.group(1))

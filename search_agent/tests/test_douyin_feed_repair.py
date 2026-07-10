@@ -96,6 +96,95 @@ def test_public_feed_repair_tries_multiple_feed_actions() -> None:
     assert actions == ["wheel:0:900"]
 
 
+def test_enter_recommend_feed_from_jingxuan_falls_back_when_click_stays_stuck() -> None:
+    adapter = _adapter()
+    actions: list[str] = []
+
+    class FakeLocator:
+        def scroll_into_view_if_needed(self, timeout: int) -> None:
+            actions.append(f"scroll:{timeout}")
+
+        def click(self, timeout: int) -> None:
+            actions.append(f"click:{timeout}")
+
+    class FakeKeyboard:
+        def press(self, key: str) -> None:
+            actions.append(f"key:{key}")
+
+    class FakeMouse:
+        def wheel(self, x: int, y: int) -> None:
+            actions.append(f"wheel:{x}:{y}")
+
+    class FakePage:
+        url = "https://www.douyin.com/jingxuan"
+        keyboard = FakeKeyboard()
+        mouse = FakeMouse()
+
+        def is_closed(self) -> bool:
+            return False
+
+        def goto(self, url: str, wait_until: str, timeout: int) -> None:
+            actions.append(f"goto:{url}:{wait_until}:{timeout}")
+            self.url = url
+
+        def wait_for_timeout(self, timeout_ms: int) -> None:
+            actions.append(f"wait:{timeout_ms}")
+
+    states = iter([_snapshot("public_jingxuan_landing"), _snapshot("recommend_feed_shell")])
+    adapter.page = FakePage()
+    adapter._ensure_page_open = lambda **_kwargs: True  # type: ignore[method-assign]
+    adapter._safe_title = lambda: "抖音-记录美好生活"  # type: ignore[method-assign]
+    adapter._wait_for_timeout_safe = lambda *_args, **_kwargs: True  # type: ignore[method-assign]
+    adapter._find_jingxuan_recommend_target = lambda timeout_ms=800: FakeLocator()  # type: ignore[method-assign]
+    adapter.classify_page_state = lambda **_kwargs: next(states)  # type: ignore[method-assign]
+
+    assert adapter.enter_recommend_feed_from_jingxuan() is True
+    assert any(action.startswith("goto:https://www.douyin.com/?recommend=1&from_nav=1") for action in actions)
+
+
+def test_enter_recommend_feed_from_jingxuan_returns_false_when_still_on_jingxuan() -> None:
+    adapter = _adapter()
+
+    class FakeLocator:
+        def scroll_into_view_if_needed(self, timeout: int) -> None:
+            return None
+
+        def click(self, timeout: int) -> None:
+            return None
+
+    class FakeKeyboard:
+        def press(self, key: str) -> None:
+            return None
+
+    class FakeMouse:
+        def wheel(self, x: int, y: int) -> None:
+            return None
+
+    class FakePage:
+        url = "https://www.douyin.com/jingxuan"
+        keyboard = FakeKeyboard()
+        mouse = FakeMouse()
+
+        def is_closed(self) -> bool:
+            return False
+
+        def goto(self, url: str, wait_until: str, timeout: int) -> None:
+            self.url = url
+
+        def wait_for_timeout(self, timeout_ms: int) -> None:
+            return None
+
+    states = iter([_snapshot("public_jingxuan_landing"), _snapshot("public_jingxuan_landing")])
+    adapter.page = FakePage()
+    adapter._ensure_page_open = lambda **_kwargs: True  # type: ignore[method-assign]
+    adapter._safe_title = lambda: "抖音-记录美好生活"  # type: ignore[method-assign]
+    adapter._wait_for_timeout_safe = lambda *_args, **_kwargs: True  # type: ignore[method-assign]
+    adapter._find_jingxuan_recommend_target = lambda timeout_ms=800: FakeLocator()  # type: ignore[method-assign]
+    adapter.classify_page_state = lambda **_kwargs: next(states)  # type: ignore[method-assign]
+
+    assert adapter.enter_recommend_feed_from_jingxuan() is False
+
+
 def test_self_profile_is_not_treated_as_creator_homepage() -> None:
     assert DouyinPageAdapter._looks_like_self_profile("https://www.douyin.com/user/self?from_tab_name=main")
     assert DouyinPageAdapter._looks_like_self_profile("https://www.douyin.com/user/MS4w?sec_user_id=self")

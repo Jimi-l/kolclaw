@@ -9,6 +9,7 @@ from search_agent.artifacts import ArtifactManager
 from search_agent.config import (
     BrowserConfig,
     DiscoveryRunConfig,
+    DouyinVerticalRunConfig,
     DoubaoVideoAnalysisRunConfig,
     DouyinLiveWorkflowRunConfig,
     DouyinVideoPipelineRunConfig,
@@ -65,6 +66,100 @@ def build_parser() -> argparse.ArgumentParser:
         help="Optional cap for how many newly queued discovery records are analyzed after discovery.",
     )
     discovery.add_argument("--log-level", type=str, default="INFO", help="Logging level.")
+
+    vertical_discovery = subparsers.add_parser(
+        "douyin-vertical-discovery",
+        help="Run Douyin tag-based vertical discovery from a CSV tag table.",
+    )
+    vertical_discovery.add_argument("--headless", action="store_true", help="Run the browser headlessly.")
+    vertical_discovery.add_argument("--max-records", type=int, default=100, help="Stop after this many qualified records.")
+    vertical_discovery.add_argument("--max-minutes", type=int, default=20, help="Maximum runtime in minutes.")
+    vertical_discovery.add_argument("--max-candidates", type=int, default=100, help="Maximum tags to inspect.")
+    vertical_discovery.add_argument(
+        "--tag-table",
+        type=str,
+        help="CSV path with serial number and tag name columns. Defaults to adapters/douyin_vertical/tag_table.csv.",
+    )
+    vertical_discovery.add_argument(
+        "--per-tag-minutes",
+        type=float,
+        default=3.0,
+        help="Maximum time budget for each tag before moving to the next tag.",
+    )
+    vertical_discovery.add_argument(
+        "--per-tag-records",
+        type=int,
+        default=None,
+        help="Optional cap for how many qualified records to save for each tag before moving to the next tag.",
+    )
+    vertical_discovery.add_argument(
+        "--publish-filter",
+        type=str,
+        default="一周内",
+        help="Douyin search publish-time filter to select after opening 筛选.",
+    )
+    vertical_discovery.add_argument(
+        "--search-without-hash",
+        action="store_true",
+        help="Strip leading # from each tag before typing/searching.",
+    )
+    vertical_discovery.add_argument(
+        "--tag-cooldown-min-seconds",
+        type=float,
+        default=8.0,
+        help="Minimum cooldown between tags to reduce Douyin search-rate pressure.",
+    )
+    vertical_discovery.add_argument(
+        "--tag-cooldown-max-seconds",
+        type=float,
+        default=18.0,
+        help="Maximum cooldown between tags to reduce Douyin search-rate pressure.",
+    )
+    vertical_discovery.add_argument(
+        "--pressure-cooldown-min-seconds",
+        type=float,
+        default=45.0,
+        help="Minimum cooldown after sparse results, skipped tags, captcha, or SMS pressure.",
+    )
+    vertical_discovery.add_argument(
+        "--pressure-cooldown-max-seconds",
+        type=float,
+        default=90.0,
+        help="Maximum cooldown after sparse results, skipped tags, captcha, or SMS pressure.",
+    )
+    vertical_discovery.add_argument(
+        "--disable-jingxuan-url-repair",
+        action="store_true",
+        help="Do not force Douyin search result pages back to /jingxuan/search/ before opening result cards.",
+    )
+    vertical_discovery.add_argument("--discovery-output", type=str, help="Optional JSONL output path for discovery records.")
+    vertical_discovery.add_argument("--queue-output", type=str, help="Optional JSONL queue path for Xingtu candidates.")
+    vertical_discovery.add_argument("--artifacts-dir", type=str, help="Optional artifacts root override.")
+    vertical_discovery.add_argument("--browser-channel", type=str, default=None, help="Optional browser channel, e.g. chrome.")
+    vertical_discovery.add_argument(
+        "--disable-content-analysis",
+        action="store_true",
+        help="Skip the automatic Gemini/heuristic content-analysis stage after discovery.",
+    )
+    vertical_discovery.add_argument(
+        "--analysis-model",
+        type=str,
+        default="gemini-2.5-flash",
+        help="Gemini model name used for the automatic content-analysis stage.",
+    )
+    vertical_discovery.add_argument(
+        "--analysis-keyframes",
+        type=int,
+        default=4,
+        help="Maximum number of keyframe screenshots to capture for each saved discovery record.",
+    )
+    vertical_discovery.add_argument(
+        "--analysis-max-items",
+        type=int,
+        default=None,
+        help="Optional cap for how many newly queued discovery records are analyzed after discovery.",
+    )
+    vertical_discovery.add_argument("--log-level", type=str, default="INFO", help="Logging level.")
 
     enrichment = subparsers.add_parser("xingtu-enrichment", help="Run Xingtu enrichment on queued records.")
     enrichment.add_argument("--headless", action="store_true", help="Run the browser headlessly.")
@@ -404,6 +499,55 @@ def run_creator_discovery(args: argparse.Namespace) -> int:
     return _emit_summary(summary.model_dump(mode="json"), 0)
 
 
+def run_douyin_vertical_discovery(args: argparse.Namespace) -> int:
+    from search_agent.adapters.douyin_vertical.vertical_workflow import DouyinVerticalDiscoveryWorkflow
+
+    paths = build_paths(args)
+    project_root = paths.project_root
+
+    def resolve_optional(path_value: str | None) -> Path | None:
+        if not path_value:
+            return None
+        path = Path(path_value)
+        return path if path.is_absolute() else project_root / path
+
+    artifacts = ArtifactManager.create(paths.artifacts_dir, WorkflowStage.DOUYIN_VERTICAL_DISCOVERY)
+    configure_logging(artifacts.log_path, args.log_level)
+    logger = get_logger("search_agent.cli")
+    logger.info("starting douyin-vertical-discovery", extra={"run_id": artifacts.run_id})
+
+    workflow = DouyinVerticalDiscoveryWorkflow(
+        paths=paths,
+        artifacts=artifacts,
+        browser_config=BrowserConfig(
+            site_name="douyin_vertical",
+            headless=args.headless,
+            channel=args.browser_channel,
+        ),
+        run_config=DouyinVerticalRunConfig(
+            max_records=args.max_records,
+            max_minutes=args.max_minutes,
+            max_candidates=args.max_candidates,
+            tag_table_path=resolve_optional(args.tag_table),
+            per_tag_minutes=args.per_tag_minutes,
+            per_tag_records=args.per_tag_records,
+            search_publish_filter=args.publish_filter,
+            include_hash_in_search=not args.search_without_hash,
+            tag_cooldown_min_seconds=args.tag_cooldown_min_seconds,
+            tag_cooldown_max_seconds=args.tag_cooldown_max_seconds,
+            pressure_cooldown_min_seconds=args.pressure_cooldown_min_seconds,
+            pressure_cooldown_max_seconds=args.pressure_cooldown_max_seconds,
+            force_jingxuan_search_url=not args.disable_jingxuan_url_repair,
+            content_analysis_enabled=not args.disable_content_analysis,
+            analysis_model=args.analysis_model,
+            analysis_keyframes=args.analysis_keyframes,
+            analysis_max_items=args.analysis_max_items,
+        ),
+    )
+    summary = workflow.run()
+    return _emit_summary(summary.model_dump(mode="json"), 0)
+
+
 def run_xingtu_enrichment(args: argparse.Namespace) -> int:
     from search_agent.adapters.xingtu.workflow import XingtuEnrichmentWorkflow
 
@@ -612,6 +756,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "creator-discovery":
             return run_creator_discovery(args)
+        if args.command == "douyin-vertical-discovery":
+            return run_douyin_vertical_discovery(args)
         if args.command == "xingtu-enrichment":
             return run_xingtu_enrichment(args)
         if args.command == "video-url-analysis":
